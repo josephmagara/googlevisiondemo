@@ -13,6 +13,6 @@ class HomeViewModelFactory @Inject constructor(private val createFileUseCase: Cr
     ViewModelProvider.NewInstanceFactory() {
 
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return HomeViewModelFactory(createFileUseCase) as T
+        return HomeViewModel(createFileUseCase) as T
     }
 }
