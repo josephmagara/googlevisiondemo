@@ -16,14 +16,17 @@ import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.containsPermission
 import com.example.googlevision.util.hasAllNeededPermissions
 import com.example.googlevision.util.requestPermissions
+import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import java.io.File
 import java.io.IOException
+import javax.inject.Inject
 
 
-class HomeActivity : AppCompatActivity() {
+class HomeActivity : DaggerAppCompatActivity() {
 
-    private lateinit var homeViewModelFactory: HomeViewModelFactory
+    @Inject
+    lateinit var homeViewModelFactory: HomeViewModelFactory
     private lateinit var homeViewModel : HomeViewModel
 
     // region LifeCycle
