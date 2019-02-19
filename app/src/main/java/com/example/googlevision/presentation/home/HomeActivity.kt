@@ -11,7 +11,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
+import com.example.googlevision.util.CAMERA_PERMISSION_REQUEST_CODE
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
+import com.example.googlevision.util.containsPermission
 import com.example.googlevision.util.hasAllNeededPermissions
 import com.example.googlevision.util.requestPermissions
 import kotlinx.android.synthetic.main.activity_home.*
@@ -44,11 +46,18 @@ class HomeActivity : AppCompatActivity() {
 
     public override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            TAKE_PICTURE_REQUEST_CODE -> if (resultCode == Activity.RESULT_OK) {
-               retrievePhoto(imageUri)
+        when (resultCode){
+            Activity.RESULT_OK -> {
+                if (requestCode == TAKE_PICTURE_REQUEST_CODE){
+                    retrievePhoto(imageUri)
+                } else if (requestCode.containsPermission()){
+                    if(hasAllNeededPermissions()){
+                        homeViewModel.triggerAddImageAction()
+                    }
+                }
             }
         }
+
     }
 
     private fun takePhoto() {

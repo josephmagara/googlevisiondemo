@@ -11,7 +11,7 @@ import androidx.core.content.ContextCompat
  * Created by josephmagara on 19/2/19.
  */
 
-private val permissionList = mapOf(
+val permissionList = mapOf(
     CAMERA to CAMERA_PERMISSION_REQUEST_CODE,
     READ_EXTERNAL_STORAGE to READ_STORAGE_PERMISSION_REQUEST_CODE,
     WRITE_EXTERNAL_STORAGE to WRITE_TO_STORAGE_PERMISSION_REQUEST_CODE
