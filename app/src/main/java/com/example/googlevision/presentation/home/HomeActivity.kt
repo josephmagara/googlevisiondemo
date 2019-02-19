@@ -11,7 +11,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.example.googlevision.util.CAMERA_PERMISSION_REQUEST_CODE
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.containsPermission
 import com.example.googlevision.util.hasAllNeededPermissions
