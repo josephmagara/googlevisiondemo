@@ -14,9 +14,9 @@ import androidx.core.content.ContextCompat
 private val permissionList = mapOf(CAMERA to 7, READ_EXTERNAL_STORAGE to 13, WRITE_EXTERNAL_STORAGE to 17)
 
 fun Activity.hasAllNeededPermissions(permissions: Map<String, Int> = permissionList): Boolean =
-    permissionList.keys.all { !permissionDenied(this, it) }
+    permissions.keys.all { !permissionDenied(this, it) }
 
-fun Activity.requestPermissionsIfNotRequested(
+fun Activity.requestPermissions(
     permissions: Map<String, Int> = permissionList
 ): Boolean {
 
