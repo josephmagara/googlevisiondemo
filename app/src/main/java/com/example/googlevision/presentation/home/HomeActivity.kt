@@ -4,30 +4,28 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
-import com.example.googlevision.util.DATE_FORMAT
+import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.containsPermission
 import com.example.googlevision.util.hasAllNeededPermissions
 import com.example.googlevision.util.requestPermissions
 import kotlinx.android.synthetic.main.activity_home.*
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
 
 
 class HomeActivity : AppCompatActivity() {
 
-    private var mCurrentPhotoPath: String? = null
-    private var homeViewModel = HomeViewModel()
+    private lateinit var homeViewModelFactory: HomeViewModelFactory
+    private lateinit var homeViewModel : HomeViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
 
+        homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
+            .get(HomeViewModel::class.java)
 
         homeViewModel.addImageAction().observe(this, Observer {
             takePhoto()

@@ -11,7 +11,7 @@ import javax.inject.Inject
 /**
  * Created by josephmagara on 19/2/19.
  */
-class CreateFileUsecase @Inject constructor(private val context: Context){
+class CreateFileUseCase @Inject constructor(private val context: Context){
 
     fun createFile(): File {
         val timeStamp: String = SimpleDateFormat(DATE_FORMAT).format(Date())
