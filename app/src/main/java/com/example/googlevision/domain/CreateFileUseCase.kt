@@ -13,11 +13,11 @@ import javax.inject.Inject
  */
 class CreateFileUseCase @Inject constructor(private val context: Context){
 
-    fun createFile(): File {
+    fun createFile(fileName: String): File {
         val timeStamp: String = SimpleDateFormat(DATE_FORMAT).format(Date())
         val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
         return File.createTempFile(
-                "JPEG_${timeStamp}_", /* prefix */
+                "JPEG_${fileName}_$timeStamp", /* prefix */
                 ".jpg", /* suffix */
                 storageDir /* directory */
         )

@@ -19,4 +19,6 @@ class HomeViewModel @Inject constructor(private val createFileUseCase: CreateFil
     }
 
     fun addImageAction(): LiveData<Any> = addImageAction
+
+    fun createFile(filename: String) = createFileUseCase.createFile(filename)
 }

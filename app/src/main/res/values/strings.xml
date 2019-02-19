@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">GoogleVision</string>
     <string name="captured_photo">Captured Photo</string>
+    <string name="file_name">New Photo</string>
 </resources>
