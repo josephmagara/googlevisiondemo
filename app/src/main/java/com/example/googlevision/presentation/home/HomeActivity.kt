@@ -1,8 +1,14 @@
 package com.example.googlevision.presentation.home
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata.LENS_FACING_FRONT
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import androidx.core.content.FileProvider
@@ -23,8 +29,8 @@ class HomeActivity : DaggerAppCompatActivity() {
 
     @Inject
     lateinit var homeViewModelFactory: HomeViewModelFactory
-    private lateinit var homeViewModel : HomeViewModel
-    private var filepath : String? = null
+    private lateinit var homeViewModel: HomeViewModel
+    private var filepath: String? = null
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +61,12 @@ class HomeActivity : DaggerAppCompatActivity() {
             Activity.RESULT_OK -> {
                 if (requestCode == TAKE_PICTURE_REQUEST_CODE) {
                     filepath?.let {
-                        val bitmap = taken_photo.setScaledPic(it)
+                        taken_photo.setScaledPic(it)?.let { bitmap ->
+                            getCameraId()?.let { cameraId ->
+                                val rotation = getRotationCompensation(cameraId)
+                                homeViewModel.extractImageFromText(bitmap, rotation)
+                            }
+                        }
                     }
                 } else if (requestCode.containsPermission()) {
                     if (hasAllNeededPermissions()) {
@@ -93,6 +104,26 @@ class HomeActivity : DaggerAppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun getCameraId(): String? {
+        var cameraId: String? = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
+            try {
+                for (id in cameraManager.cameraIdList) {
+                    val cameraCharacteristics = cameraManager.getCameraCharacteristics(id)
+                    if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == LENS_FACING_FRONT) {
+                        cameraId = id
+                        break
+                    }
+
+                }
+            } catch (e: CameraAccessException) {
+                e.printStackTrace()
+            }
+        }
+        return cameraId
     }
     // endregion
 

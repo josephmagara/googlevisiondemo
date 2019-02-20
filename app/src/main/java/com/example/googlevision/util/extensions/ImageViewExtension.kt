@@ -8,7 +8,7 @@ import android.widget.ImageView
  * Created by josephmagara on 20/2/19.
  */
 
-fun ImageView.setScaledPic(absolutePhotoPath: String): Bitmap?{
+fun ImageView.setScaledPic(absolutePhotoPath: String): Bitmap? {
     // Get the dimensions of the View
     val targetW: Int = width
     val targetH: Int = height
@@ -28,9 +28,8 @@ fun ImageView.setScaledPic(absolutePhotoPath: String): Bitmap?{
         inSampleSize = scaleFactor
         inPurgeable = true
     }
-    val bitmap = BitmapFactory.decodeFile(absolutePhotoPath, bmOptions)?.also { bitmap ->
+
+    return BitmapFactory.decodeFile(absolutePhotoPath, bmOptions)?.also { bitmap ->
         setImageBitmap(bitmap)
     }
-
-    return bitmap
 }

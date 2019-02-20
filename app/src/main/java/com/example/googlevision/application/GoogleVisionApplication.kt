@@ -1,6 +1,7 @@
 package com.example.googlevision.application
 
 import com.example.googlevision.application.injection.component.DaggerApplicationComponent
+import com.google.firebase.FirebaseApp
 import dagger.android.AndroidInjector
 import dagger.android.DaggerApplication
 
@@ -12,5 +13,10 @@ class GoogleVisionApplication : DaggerApplication() {
         return DaggerApplicationComponent.builder()
             .bindApplication(this)
             .build()
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        FirebaseApp.initializeApp(this)
     }
 }
