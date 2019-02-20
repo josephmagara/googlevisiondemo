@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
+import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
@@ -22,7 +24,7 @@ class HomeViewModel @Inject constructor(
     private var imageProcessedDisposable = Disposables.disposed()
 
     init {
-        imageProcessedDisposable = imageProcessorObserver.resultObserver()
+        imageProcessedDisposable = imageProcessorObserver.imageProcessResultObserver()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.computation())
             .subscribe {

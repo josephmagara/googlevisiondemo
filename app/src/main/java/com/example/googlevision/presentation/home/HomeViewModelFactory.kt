@@ -2,6 +2,8 @@ package com.example.googlevision.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
+import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
 import javax.inject.Inject
 
 /**
