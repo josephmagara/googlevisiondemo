@@ -1,6 +1,5 @@
 package com.example.googlevision.domain
 
-import com.example.googlevision.data.interfaces.ImageProcessorObserver
 import javax.inject.Inject
 
 /**

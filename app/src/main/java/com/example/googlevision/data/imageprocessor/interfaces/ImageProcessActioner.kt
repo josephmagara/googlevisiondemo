@@ -1,4 +1,4 @@
-package com.example.googlevision.data.interfaces
+package com.example.googlevision.data.imageprocessor.interfaces
 
 import android.graphics.Bitmap
 

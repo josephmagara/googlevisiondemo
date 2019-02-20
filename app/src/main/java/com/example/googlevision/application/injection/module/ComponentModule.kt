@@ -1,8 +1,6 @@
 package com.example.googlevision.application.injection.module
 
 import com.example.googlevision.data.imageprocessor.ImageProcessor
-import com.example.googlevision.data.interfaces.ImageProcessActioner
-import com.example.googlevision.data.interfaces.ImageProcessorObserver
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton
