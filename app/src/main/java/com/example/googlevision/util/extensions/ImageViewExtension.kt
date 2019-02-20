@@ -1,5 +1,6 @@
 package com.example.googlevision.util.extensions
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.widget.ImageView
 
@@ -7,7 +8,7 @@ import android.widget.ImageView
  * Created by josephmagara on 20/2/19.
  */
 
-fun ImageView.setScaledPic(absolutePhotoPath: String){
+fun ImageView.setScaledPic(absolutePhotoPath: String): Bitmap?{
     // Get the dimensions of the View
     val targetW: Int = width
     val targetH: Int = height
@@ -27,7 +28,9 @@ fun ImageView.setScaledPic(absolutePhotoPath: String){
         inSampleSize = scaleFactor
         inPurgeable = true
     }
-    BitmapFactory.decodeFile(absolutePhotoPath, bmOptions)?.also { bitmap ->
+    val bitmap = BitmapFactory.decodeFile(absolutePhotoPath, bmOptions)?.also { bitmap ->
         setImageBitmap(bitmap)
     }
+
+    return bitmap
 }

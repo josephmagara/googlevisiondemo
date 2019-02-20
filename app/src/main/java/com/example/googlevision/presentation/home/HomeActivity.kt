@@ -55,7 +55,7 @@ class HomeActivity : DaggerAppCompatActivity() {
             Activity.RESULT_OK -> {
                 if (requestCode == TAKE_PICTURE_REQUEST_CODE) {
                     filepath?.let {
-                        taken_photo.setScaledPic(it)
+                        val bitmap = taken_photo.setScaledPic(it)
                     }
                 } else if (requestCode.containsPermission()) {
                     if (hasAllNeededPermissions()) {
