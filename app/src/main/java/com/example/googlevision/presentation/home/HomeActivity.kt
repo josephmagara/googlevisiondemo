@@ -18,8 +18,10 @@ import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.extensions.*
+import com.google.firebase.FirebaseApp
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
+import timber.log.Timber
 import java.io.File
 import java.io.IOException
 import javax.inject.Inject
@@ -36,11 +38,18 @@ class HomeActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
 
+
+        FirebaseApp.initializeApp(this)
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
             .get(HomeViewModel::class.java)
 
         homeViewModel.addImageAction().observe(this, Observer {
             takePhoto()
+        })
+
+        homeViewModel.processedText().observe(this, Observer { text ->
+            Timber.v("Incoming text: $text")
+            extracted_text.text = text
         })
 
         add_button.setOnClickListener {

@@ -2,7 +2,6 @@ package com.example.googlevision.util.extensions
 
 import android.Manifest
 import android.app.Activity
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Context.CAMERA_SERVICE
 import android.content.pm.PackageManager
@@ -11,7 +10,6 @@ import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Environment
-import android.util.Log
 import android.view.Surface
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -21,6 +19,7 @@ import com.example.googlevision.util.DATE_FORMAT
 import com.example.googlevision.util.READ_STORAGE_PERMISSION_REQUEST_CODE
 import com.example.googlevision.util.WRITE_TO_STORAGE_PERMISSION_REQUEST_CODE
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
+import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -102,7 +101,7 @@ fun Activity.getRotationCompensation(cameraId: String): Int {
         270 -> result = FirebaseVisionImageMetadata.ROTATION_270
         else -> {
             result = FirebaseVisionImageMetadata.ROTATION_0
-            Log.e(TAG, "Bad rotation value: $rotationCompensation")
+            Timber.e("Bad rotation value: $rotationCompensation")
         }
     }
     return result

@@ -1,16 +1,16 @@
 package com.example.googlevision.data.imageprocessor
 
-import android.content.Context
 import android.graphics.Bitmap
 import com.example.googlevision.data.interfaces.ImageProcessActioner
 import com.example.googlevision.data.interfaces.ImageProcessorObserver
-import com.google.firebase.FirebaseApp
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
+import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21
 import com.google.firebase.ml.vision.text.FirebaseVisionText
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
+import timber.log.Timber
 import java.nio.ByteBuffer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,8 +30,9 @@ class ImageProcessor @Inject constructor(): ImageProcessActioner, ImageProcessor
         val detector = FirebaseVision.getInstance()
             .onDeviceTextRecognizer
 
-        detector.processImage(firebaseVisionImage)
+        val result = detector.processImage(firebaseVisionImage)
             .addOnSuccessListener { firebaseVisionText ->
+                Timber.d(firebaseVisionImage.toString())
                 resultProcessor.onNext(firebaseVisionText)
             }
             .addOnFailureListener {
@@ -47,6 +48,7 @@ class ImageProcessor @Inject constructor(): ImageProcessActioner, ImageProcessor
             .setWidth(bitmap.width)
             .setHeight(bitmap.height)
             .setRotation(rotation)
+            .setFormat(IMAGE_FORMAT_NV21)
             .build()
 
         val bytes = bitmap.byteCount
