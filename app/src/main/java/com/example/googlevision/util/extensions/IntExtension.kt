@@ -1,4 +1,4 @@
-package com.example.googlevision.util
+package com.example.googlevision.util.extensions
 
 /**
  * Created by josephmagara on 19/2/19.

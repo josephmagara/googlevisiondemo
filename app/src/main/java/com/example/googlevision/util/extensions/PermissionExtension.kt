@@ -1,4 +1,4 @@
-package com.example.googlevision.util
+package com.example.googlevision.util.extensions
 
 import android.Manifest.permission.*
 import android.app.Activity
@@ -6,6 +6,9 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.googlevision.util.CAMERA_PERMISSION_REQUEST_CODE
+import com.example.googlevision.util.READ_STORAGE_PERMISSION_REQUEST_CODE
+import com.example.googlevision.util.WRITE_TO_STORAGE_PERMISSION_REQUEST_CODE
 
 /**
  * Created by josephmagara on 19/2/19.

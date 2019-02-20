@@ -12,9 +12,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
-import com.example.googlevision.util.containsPermission
-import com.example.googlevision.util.hasAllNeededPermissions
-import com.example.googlevision.util.requestPermissions
+import com.example.googlevision.util.extensions.*
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import java.io.File
@@ -27,7 +25,7 @@ class HomeActivity : DaggerAppCompatActivity() {
     @Inject
     lateinit var homeViewModelFactory: HomeViewModelFactory
     private lateinit var homeViewModel : HomeViewModel
-
+    private var filepath : String? = null
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,8 +55,9 @@ class HomeActivity : DaggerAppCompatActivity() {
         when (resultCode) {
             Activity.RESULT_OK -> {
                 if (requestCode == TAKE_PICTURE_REQUEST_CODE) {
-                    val imageBitmap = data?.extras?.get("data") as Bitmap
-                    taken_photo.setImageBitmap(imageBitmap)
+                    filepath?.let {
+                        taken_photo.setScaledPic(it)
+                    }
                 } else if (requestCode.containsPermission()) {
                     if (hasAllNeededPermissions()) {
                         homeViewModel.triggerAddImageAction()
@@ -76,31 +75,26 @@ class HomeActivity : DaggerAppCompatActivity() {
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
                 val photoFile: File? = try {
-                    createImageFile(getString(R.string.file_name))
+                    this.createFile(getString(R.string.file_name))
                 } catch (ex: IOException) {
                     // Error occurred while creating the File
                     null
                 }
                 // Continue only if the File was successfully created
                 photoFile?.also {
+                    filepath = it.absolutePath
                     val photoURI: Uri = FileProvider.getUriForFile(
                         this,
                         "${BuildConfig.APPLICATION_ID}.provider",
                         it
                     )
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                    takePictureIntent.putExtra("filepath", it.absolutePath)
                     startActivityForResult(takePictureIntent, TAKE_PICTURE_REQUEST_CODE)
                 }
             }
         }
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
-            takePictureIntent.resolveActivity(packageManager)?.also {
-                startActivityForResult(takePictureIntent, TAKE_PICTURE_REQUEST_CODE)
-            }
-        }
     }
-
-    private fun createImageFile(fileName: String): File = homeViewModel.createFile(fileName)
     // endregion
 
 }
