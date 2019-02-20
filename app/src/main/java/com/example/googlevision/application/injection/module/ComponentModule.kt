@@ -5,6 +5,7 @@ import com.example.googlevision.data.interfaces.ImageProcessActioner
 import com.example.googlevision.data.interfaces.ImageProcessorObserver
 import dagger.Module
 import dagger.Provides
+import javax.inject.Singleton
 
 /**
  * Created by josephmagara on 20/2/19.
@@ -13,9 +14,11 @@ import dagger.Provides
 @Module
 class ComponentModule {
 
+    @Singleton
     @Provides
     fun provideImageProcessorObservable(imageProcessor: ImageProcessor): ImageProcessorObserver = imageProcessor
 
+    @Singleton
     @Provides
     fun provideImageProcessActioner(imageProcessor: ImageProcessor): ImageProcessActioner = imageProcessor
 

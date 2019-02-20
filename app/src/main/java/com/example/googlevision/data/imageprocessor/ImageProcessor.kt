@@ -1,8 +1,10 @@
 package com.example.googlevision.data.imageprocessor
 
+import android.content.Context
 import android.graphics.Bitmap
 import com.example.googlevision.data.interfaces.ImageProcessActioner
 import com.example.googlevision.data.interfaces.ImageProcessorObserver
+import com.google.firebase.FirebaseApp
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
@@ -11,11 +13,13 @@ import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
 import java.nio.ByteBuffer
 import javax.inject.Inject
+import javax.inject.Singleton
 
 
 /**
  * Created by josephmagara on 20/2/19.
  */
+@Singleton
 class ImageProcessor @Inject constructor(): ImageProcessActioner, ImageProcessorObserver {
 
     private val resultProcessor = PublishProcessor.create<FirebaseVisionText>()
@@ -26,7 +30,7 @@ class ImageProcessor @Inject constructor(): ImageProcessActioner, ImageProcessor
         val detector = FirebaseVision.getInstance()
             .onDeviceTextRecognizer
 
-        val result = detector.processImage(firebaseVisionImage)
+        detector.processImage(firebaseVisionImage)
             .addOnSuccessListener { firebaseVisionText ->
                 resultProcessor.onNext(firebaseVisionText)
             }
