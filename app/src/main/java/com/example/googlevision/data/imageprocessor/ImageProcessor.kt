@@ -3,14 +3,16 @@ package com.example.googlevision.data.imageprocessor
 import android.graphics.Bitmap
 import com.example.googlevision.data.interfaces.ImageProcessActioner
 import com.example.googlevision.data.interfaces.ImageProcessorObserver
+import com.example.googlevision.util.extensions.withDefaultValueIfNeeded
 import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
-import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21
+import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata.IMAGE_FORMAT_YV12
 import com.google.firebase.ml.vision.text.FirebaseVisionText
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
+import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,9 +32,9 @@ class ImageProcessor @Inject constructor(): ImageProcessActioner, ImageProcessor
         val detector = FirebaseVision.getInstance()
             .onDeviceTextRecognizer
 
-        val result = detector.processImage(firebaseVisionImage)
+        detector.processImage(firebaseVisionImage)
             .addOnSuccessListener { firebaseVisionText ->
-                Timber.d(firebaseVisionImage.toString())
+                Timber.d(firebaseVisionImage.toString().withDefaultValueIfNeeded())
                 resultProcessor.onNext(firebaseVisionText)
             }
             .addOnFailureListener {
@@ -45,14 +47,17 @@ class ImageProcessor @Inject constructor(): ImageProcessActioner, ImageProcessor
     private fun getFireBaseVisionImage(bitmap: Bitmap, rotation: Int): FirebaseVisionImage {
 
         val metadata = FirebaseVisionImageMetadata.Builder()
-            .setWidth(bitmap.width)
-            .setHeight(bitmap.height)
+            .setWidth(480)
+            .setHeight(360)
             .setRotation(rotation)
-            .setFormat(IMAGE_FORMAT_NV21)
+            .setFormat(IMAGE_FORMAT_YV12)
             .build()
 
         val bytes = bitmap.byteCount
         val byteBuffer = ByteBuffer.allocate(bytes)
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        byteBuffer.put(stream.toByteArray())
 
         return FirebaseVisionImage.fromByteBuffer(byteBuffer, metadata)
     }
