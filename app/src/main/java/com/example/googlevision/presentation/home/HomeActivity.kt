@@ -3,6 +3,8 @@ package com.example.googlevision.presentation.home
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.hardware.Camera
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
@@ -16,9 +18,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
+import com.example.googlevision.presentation.FirebaseVisionImageInterface
+import com.example.googlevision.presentation.camerapreview.CameraPreview
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.extensions.*
-import com.google.firebase.FirebaseApp
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import timber.log.Timber
@@ -27,19 +30,24 @@ import java.io.IOException
 import javax.inject.Inject
 
 
-class HomeActivity : DaggerAppCompatActivity() {
+class HomeActivity : DaggerAppCompatActivity(), FirebaseVisionImageInterface {
 
     @Inject
     lateinit var homeViewModelFactory: HomeViewModelFactory
     private lateinit var homeViewModel: HomeViewModel
+
+    private lateinit var currentCamera: Camera
+    private lateinit var cameraPreview: CameraPreview
+
     private var filepath: String? = null
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
 
+        currentCamera = Camera.open()
+        cameraPreview = CameraPreview(this, camera_preview)
 
-        FirebaseApp.initializeApp(this)
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
             .get(HomeViewModel::class.java)
 
@@ -82,6 +90,16 @@ class HomeActivity : DaggerAppCompatActivity() {
                         homeViewModel.triggerAddImageAction()
                     }
                 }
+            }
+        }
+    }
+
+    override fun onFirebaseVisionImageDetected() {
+        val pictureCallback = Camera.PictureCallback { data, _ ->
+            val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
+            getCameraId()?.let { cameraId ->
+                val rotation = getRotationCompensation(cameraId)
+                homeViewModel.extractInformationFromBarcode(bitmap, rotation)
             }
         }
     }
