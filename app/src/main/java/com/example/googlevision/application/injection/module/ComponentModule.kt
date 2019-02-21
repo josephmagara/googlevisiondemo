@@ -1,5 +1,8 @@
 package com.example.googlevision.application.injection.module
 
+import com.example.googlevision.data.barcodeprocessor.BarcodeProcessor
+import com.example.googlevision.data.barcodeprocessor.interfaces.BarcodeProcessActioner
+import com.example.googlevision.data.barcodeprocessor.interfaces.BarcodeProcessObserver
 import com.example.googlevision.data.imageprocessor.ImageProcessor
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
@@ -21,5 +24,13 @@ class ComponentModule {
     @Singleton
     @Provides
     fun provideImageProcessActioner(imageProcessor: ImageProcessor): ImageProcessActioner = imageProcessor
+
+    @Singleton
+    @Provides
+    fun provideBarcodeProcessorObservable(barcodeProcessor: BarcodeProcessor): BarcodeProcessObserver = barcodeProcessor
+
+    @Singleton
+    @Provides
+    fun provideBarcodeProcessActioner(barcodeProcessor: BarcodeProcessor): BarcodeProcessActioner = barcodeProcessor
 
 }

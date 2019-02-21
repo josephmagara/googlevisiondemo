@@ -73,7 +73,7 @@ class HomeActivity : DaggerAppCompatActivity() {
                         taken_photo.setScaledPic(it)?.let { bitmap ->
                             getCameraId()?.let { cameraId ->
                                 val rotation = getRotationCompensation(cameraId)
-                                homeViewModel.extractImageFromText(bitmap, rotation)
+                                homeViewModel.extractInformationFromBarcode(bitmap, rotation)
                             }
                         }
                     }

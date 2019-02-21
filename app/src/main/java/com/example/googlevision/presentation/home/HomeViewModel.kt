@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.googlevision.data.barcodeprocessor.interfaces.BarcodeProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
 import com.example.googlevision.domain.models.GvBarcode
@@ -19,6 +20,7 @@ import javax.inject.Inject
  */
 class HomeViewModel @Inject constructor(
     private val imageProcessActioner: ImageProcessActioner,
+    private val barcodeProcessActioner: BarcodeProcessActioner,
     imageProcessorObserver: ImageProcessorObserver,
     processBarcodeUseCase: ProcessBarcodeUseCase
 ) : ViewModel() {
@@ -71,6 +73,9 @@ class HomeViewModel @Inject constructor(
 
     fun processedText(): LiveData<String> = processedText
 
-    fun extractImageFromText(bitmap: Bitmap, imageRotation: Int) =
+    fun extractTextFromImage(bitmap: Bitmap, imageRotation: Int) =
         imageProcessActioner.extractTextFromImage(bitmap, imageRotation)
+
+    fun extractInformationFromBarcode(bitmap: Bitmap, rotation: Int) =
+        barcodeProcessActioner.extractInformationFromBarcode(bitmap, rotation)
 }
