@@ -18,7 +18,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
-import com.example.googlevision.presentation.FirebaseVisionImageInterface
+import com.example.googlevision.presentation.GoogleVisionCameraPreviewInterface
 import com.example.googlevision.presentation.camerapreview.CameraPreview
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.extensions.*
@@ -30,7 +30,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 
-class HomeActivity : DaggerAppCompatActivity(), FirebaseVisionImageInterface {
+class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterface {
 
     @Inject
     lateinit var homeViewModelFactory: HomeViewModelFactory
@@ -53,6 +53,16 @@ class HomeActivity : DaggerAppCompatActivity(), FirebaseVisionImageInterface {
 
         homeViewModel.addImageAction().observe(this, Observer {
             takePhoto()
+        })
+
+        homeViewModel.captureImage().observe(this, Observer {
+            val pictureCallback = Camera.PictureCallback { data, _ ->
+                val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
+                getCameraId()?.let { cameraId ->
+                    val rotation = getRotationCompensation(cameraId)
+                    homeViewModel.extractInformationFromBarcode(bitmap, rotation)
+                }
+            }
         })
 
         homeViewModel.processedText().observe(this, Observer { text ->
@@ -94,15 +104,10 @@ class HomeActivity : DaggerAppCompatActivity(), FirebaseVisionImageInterface {
         }
     }
 
-    override fun onFirebaseVisionImageDetected() {
-        val pictureCallback = Camera.PictureCallback { data, _ ->
-            val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
-            getCameraId()?.let { cameraId ->
-                val rotation = getRotationCompensation(cameraId)
-                homeViewModel.extractInformationFromBarcode(bitmap, rotation)
-            }
-        }
-    }
+    override fun onCameraSteadied() = homeViewModel.stopImageCaptureTimer()
+
+
+    override fun onCameraMoved() = homeViewModel.startImageCaptureTimer()
     // endregion
 
     // region Private functions

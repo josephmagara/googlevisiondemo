@@ -3,6 +3,7 @@ package com.example.googlevision.presentation.home
 import android.graphics.Bitmap
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.example.googlevision.data.barcodeprocessor.interfaces.BarcodeProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
@@ -10,9 +11,12 @@ import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObs
 import com.example.googlevision.domain.models.GvBarcode
 import com.example.googlevision.domain.usecases.ProcessBarcodeUseCase
 import com.example.googlevision.util.extensions.cast
+import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 /**
@@ -25,10 +29,16 @@ class HomeViewModel @Inject constructor(
     processBarcodeUseCase: ProcessBarcodeUseCase
 ) : ViewModel() {
 
+    companion object {
+        private const val IMAGE_CAPTURE_DELAY = 1000L
+    }
+
     private var addImageAction = MutableLiveData<Any>()
+    private var captureImage = MutableLiveData<Any>()
     private var processedText = MutableLiveData<String>()
     private var imageProcessedDisposable = Disposables.disposed()
     private var barcodeProcessedDisposable = Disposables.disposed()
+    private var imageCaptureTimer = Disposables.disposed()
 
     init {
         imageProcessedDisposable = imageProcessorObserver.imageProcessResultObserver()
@@ -69,9 +79,24 @@ class HomeViewModel @Inject constructor(
         addImageAction.value = true
     }
 
+    @Deprecated("This will be pulled out soon, use capture image instead")
     fun addImageAction(): LiveData<Any> = addImageAction
 
+    fun captureImage(): LiveData<Any> = captureImage
+
     fun processedText(): LiveData<String> = processedText
+
+    fun stopImageCaptureTimer() = imageCaptureTimer.dispose()
+
+    fun startImageCaptureTimer(){
+        imageCaptureTimer.dispose()
+        imageCaptureTimer = Completable.timer(IMAGE_CAPTURE_DELAY, TimeUnit.MILLISECONDS)
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.computation())
+            .subscribe {
+                captureImage.value = true
+            }
+    }
 
     fun extractTextFromImage(bitmap: Bitmap, imageRotation: Int) =
         imageProcessActioner.extractTextFromImage(bitmap, imageRotation)

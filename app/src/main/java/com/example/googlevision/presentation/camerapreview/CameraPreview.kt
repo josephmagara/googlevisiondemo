@@ -6,6 +6,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
+import com.example.googlevision.presentation.GoogleVisionCameraPreviewInterface
 import timber.log.Timber
 import java.io.IOException
 
@@ -15,6 +16,7 @@ import java.io.IOException
 class CameraPreview(
     context: Context,
     private val view: View,
+    private val googleVisionCameraPreviewInterface: GoogleVisionCameraPreviewInterface,
     surfaceView: SurfaceView = SurfaceView(context)) : ViewGroup(context),
     SurfaceHolder.Callback {
 
