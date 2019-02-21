@@ -8,13 +8,14 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
+import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Created by josephmagara on 21/2/19.
  */
 @Singleton
-class BarcodeProcessor : FireBaseProcessor(), BarcodeProcessObserver, BarcodeProcessActioner {
+class BarcodeProcessor @Inject constructor() : FireBaseProcessor(), BarcodeProcessObserver, BarcodeProcessActioner {
 
     private val resultProcessor = PublishProcessor.create<List<FirebaseVisionBarcode>>()
 

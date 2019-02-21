@@ -16,13 +16,13 @@ abstract class FireBaseProcessor {
             .setWidth(480)
             .setHeight(360)
             .setRotation(rotation)
-            .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_YV12)
+            .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
             .build()
 
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
 
 
-        return FirebaseVisionImage.fromByteArray(stream.toByteArray(), metadata)
+        return FirebaseVisionImage.fromBitmap(bitmap)
     }
 }
