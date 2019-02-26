@@ -19,7 +19,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
 import com.example.googlevision.presentation.GoogleVisionCameraPreviewInterface
-import com.example.googlevision.presentation.camerapreview.CameraPreview
+import com.example.googlevision.presentation.camera.GoogleVisionCameraPreview
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.extensions.*
 import dagger.android.support.DaggerAppCompatActivity
@@ -36,17 +36,12 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
     lateinit var homeViewModelFactory: HomeViewModelFactory
     private lateinit var homeViewModel: HomeViewModel
 
-    private lateinit var currentCamera: Camera
-    private lateinit var cameraPreview: CameraPreview
-
     private var filepath: String? = null
+    private val googleVisionCameraPreview: GoogleVisionCameraPreview? = null
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
-
-        currentCamera = Camera.open()
-        cameraPreview = CameraPreview(this, camera_preview)
 
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
             .get(HomeViewModel::class.java)
@@ -77,8 +72,19 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
                 homeViewModel.triggerAddImageAction()
             }
         }
+
+        setupCamera()
     }
 
+    override fun onPause() {
+        super.onPause()
+        googleVisionCameraPreview?.stopPreview()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        googleVisionCameraPreview?.release()
+    }
     // endregion
 
     // region Public functions
@@ -108,9 +114,15 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
 
 
     override fun onCameraMoved() = homeViewModel.startImageCaptureTimer()
+
     // endregion
 
     // region Private functions
+    private fun setupCamera() {
+        val googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview)
+        camera_preview.setRenderer(googleVisionCameraPreview)
+    }
+
     private fun takePhoto() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
             // Ensure that there's a camera activity to handle the intent
@@ -157,6 +169,7 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
         }
         return cameraId
     }
+
     // endregion
 
 }
