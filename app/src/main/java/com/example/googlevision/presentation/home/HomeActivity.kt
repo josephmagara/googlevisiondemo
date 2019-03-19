@@ -11,6 +11,7 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata.LENS_FACING_FRONT
+import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -20,15 +21,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
-import com.example.googlevision.presentation.GoogleVisionCameraPreviewInterface
+import com.example.googlevision.presentation.ImageRetrievalPipeline
 import com.example.googlevision.presentation.camera.GoogleVisionCameraPreview
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
-import com.example.googlevision.util.extensions.containsPermission
-import com.example.googlevision.util.extensions.createFile
-import com.example.googlevision.util.extensions.getRotationCompensation
-import com.example.googlevision.util.extensions.hasAllNeededPermissions
-import com.example.googlevision.util.extensions.requestPermissions
-import com.example.googlevision.util.extensions.setScaledPic
+import com.example.googlevision.util.extensions.*
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import timber.log.Timber
@@ -37,7 +33,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 
-class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterface {
+class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     @Inject
     lateinit var homeViewModelFactory: HomeViewModelFactory
@@ -135,16 +131,13 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
         }
     }
 
-    override fun onCameraSteadied() = homeViewModel.stopImageCaptureTimer()
-
-
-    override fun onCameraMoved() = homeViewModel.startImageCaptureTimer()
+    override fun onImageReceived(image: Image) = homeViewModel.processImage(image)
 
     // endregion
 
     // region Private functions
     private fun setupCamera() {
-        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this)
+        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this, this)
     }
 
     private fun takePhoto() {

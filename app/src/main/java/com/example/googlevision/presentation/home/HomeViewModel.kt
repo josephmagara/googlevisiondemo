@@ -1,9 +1,9 @@
 package com.example.googlevision.presentation.home
 
 import android.graphics.Bitmap
+import android.media.Image
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import com.example.googlevision.data.barcodeprocessor.interfaces.BarcodeProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
@@ -12,7 +12,6 @@ import com.example.googlevision.domain.models.GvBarcode
 import com.example.googlevision.domain.usecases.ProcessBarcodeUseCase
 import com.example.googlevision.util.extensions.cast
 import io.reactivex.Completable
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
@@ -96,6 +95,10 @@ class HomeViewModel @Inject constructor(
             .subscribe {
                 captureImage.value = true
             }
+    }
+
+    fun processImage(image: Image){
+
     }
 
     fun extractTextFromImage(bitmap: Bitmap, imageRotation: Int) =

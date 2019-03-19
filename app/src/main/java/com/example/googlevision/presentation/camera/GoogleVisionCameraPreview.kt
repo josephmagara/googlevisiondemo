@@ -16,6 +16,7 @@ import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.Toast
+import com.example.googlevision.presentation.ImageRetrievalPipeline
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -24,7 +25,9 @@ import javax.microedition.khronos.opengles.GL10
 /**
  * Created by josephmagara on 26/2/19.
  */
-class GoogleVisionCameraPreview(cameraPreviewView: SurfaceView, private val activity: Activity) :
+class GoogleVisionCameraPreview(cameraPreviewView: SurfaceView,
+                                private val activity: Activity,
+                                private val imageRetrievalPipeline: ImageRetrievalPipeline) :
         SurfaceHolder.Callback, GLSurfaceView.Renderer, Handler.Callback {
 
     companion object {
@@ -131,7 +134,7 @@ class GoogleVisionCameraPreview(cameraPreviewView: SurfaceView, private val acti
         // prepare list of surfaces to be used in capture requests
         val imageReader = ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 1)
         imageReader.setOnImageAvailableListener({
-            it.acquireLatestImage()
+            imageRetrievalPipeline.onImageReceived(it.acquireLatestImage())
         }, null)
 
         val surfaceList: MutableList<Surface> = arrayOf(
