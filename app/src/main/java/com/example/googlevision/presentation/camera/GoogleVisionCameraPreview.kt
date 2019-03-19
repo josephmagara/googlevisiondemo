@@ -3,7 +3,10 @@ package com.example.googlevision.presentation.camera
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context.CAMERA_SERVICE
-import android.hardware.camera2.*
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCaptureSession
+import android.hardware.camera2.CameraDevice
+import android.hardware.camera2.CameraManager
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Message
@@ -14,7 +17,6 @@ import android.widget.Toast
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
-import android.hardware.camera2.CameraAccessException
 
 /**
  * Created by josephmagara on 26/2/19.
@@ -41,7 +43,6 @@ class GoogleVisionCameraPreview(
         cameraPreview.holder?.addCallback(this)
         cameraPreview.holder?.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS)
         cameraPreview.holder?.setKeepScreenOn(true)
-        openCamera()
     }
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {

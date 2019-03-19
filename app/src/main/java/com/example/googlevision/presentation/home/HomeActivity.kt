@@ -1,8 +1,10 @@
 package com.example.googlevision.presentation.home
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.hardware.Camera
 import android.hardware.camera2.CameraAccessException
@@ -21,7 +23,12 @@ import com.example.googlevision.R
 import com.example.googlevision.presentation.GoogleVisionCameraPreviewInterface
 import com.example.googlevision.presentation.camera.GoogleVisionCameraPreview
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
-import com.example.googlevision.util.extensions.*
+import com.example.googlevision.util.extensions.containsPermission
+import com.example.googlevision.util.extensions.createFile
+import com.example.googlevision.util.extensions.getRotationCompensation
+import com.example.googlevision.util.extensions.hasAllNeededPermissions
+import com.example.googlevision.util.extensions.requestPermissions
+import com.example.googlevision.util.extensions.setScaledPic
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import timber.log.Timber
@@ -37,14 +44,14 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
     private lateinit var homeViewModel: HomeViewModel
 
     private var filepath: String? = null
-    private val googleVisionCameraPreview: GoogleVisionCameraPreview? = null
+    private var googleVisionCameraPreview: GoogleVisionCameraPreview? = null
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
 
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
-            .get(HomeViewModel::class.java)
+                .get(HomeViewModel::class.java)
 
         homeViewModel.addImageAction().observe(this, Observer {
             takePhoto()
@@ -75,18 +82,20 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
 
         if (this.hasAllNeededPermissions()) {
             setupCamera()
-        }else{
+        } else {
             requestPermissions()
         }
     }
 
     override fun onResume() {
         super.onResume()
+        Timber.v("Starting preview")
         googleVisionCameraPreview?.startPreview()
     }
 
     override fun onPause() {
         super.onPause()
+        Timber.v("Stopping preview")
         googleVisionCameraPreview?.stopPreview()
     }
     // endregion
@@ -114,6 +123,18 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
         }
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        permissions.forEachIndexed { index, permission ->
+            if (grantResults[index] == PackageManager.PERMISSION_GRANTED) {
+                when (permission) {
+                    Manifest.permission.CAMERA -> setupCamera()
+                }
+            }
+        }
+    }
+
     override fun onCameraSteadied() = homeViewModel.stopImageCaptureTimer()
 
 
@@ -123,7 +144,7 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
 
     // region Private functions
     private fun setupCamera() {
-        val googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this)
+        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this)
     }
 
     private fun takePhoto() {
@@ -141,9 +162,9 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
                 photoFile?.also {
                     filepath = it.absolutePath
                     val photoURI: Uri = FileProvider.getUriForFile(
-                        this,
-                        "${BuildConfig.APPLICATION_ID}.provider",
-                        it
+                            this,
+                            "${BuildConfig.APPLICATION_ID}.provider",
+                            it
                     )
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     takePictureIntent.putExtra("filepath", it.absolutePath)
@@ -164,7 +185,6 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
                         cameraId = id
                         break
                     }
-
                 }
             } catch (e: CameraAccessException) {
                 e.printStackTrace()

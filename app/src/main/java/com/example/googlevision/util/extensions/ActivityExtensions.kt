@@ -2,7 +2,6 @@ package com.example.googlevision.util.extensions
 
 import android.Manifest
 import android.app.Activity
-import android.content.Context
 import android.content.Context.CAMERA_SERVICE
 import android.content.pm.PackageManager
 import android.hardware.camera2.CameraAccessException
@@ -22,7 +21,7 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
 
 
 /**
@@ -48,7 +47,7 @@ val permissionList = mapOf(
 )
 
 fun Activity.hasAllNeededPermissions(permissions: Map<String, Int> = permissionList): Boolean =
-        permissions.keys.all { permissionGranted(this, it) }
+        permissions.keys.all { permissionGranted(it) }
 
 fun Activity.requestPermissions(permissions: Map<String, Int> = permissionList): Boolean {
 
@@ -56,7 +55,7 @@ fun Activity.requestPermissions(permissions: Map<String, Int> = permissionList):
 
     val nonGrantedPermissionValues = permissions
             .filter { permission ->
-                !permissionGranted(this, permission.key)
+                !permissionGranted(permission.key)
                         .also { isNotGranted ->
                             if (isNotGranted) {
                                 requestCode *= permission.value
@@ -115,5 +114,5 @@ fun Activity.createFile(fileName: String): File {
 }
 
 
-private fun permissionGranted(context: Context, permission: String) =
-        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+fun Activity.permissionGranted(permission: String) =
+        ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
