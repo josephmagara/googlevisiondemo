@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:layout_margin="16dp"
-        android:layout_weight="1"
         android:adjustViewBounds="true"
         android:contentDescription="@string/captured_photo"/>
 

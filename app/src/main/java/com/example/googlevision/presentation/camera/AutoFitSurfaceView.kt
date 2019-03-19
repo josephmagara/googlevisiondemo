@@ -36,7 +36,7 @@ class AutoFitSurfaceView @JvmOverloads constructor(context: Context, attrs: Attr
         val width = View.MeasureSpec.getSize(widthMeasureSpec)
         val height = View.MeasureSpec.getSize(heightMeasureSpec)
         if (0 == mRatioWidth || 0 == mRatioHeight) {
-            setMeasuredDimension(width, height)
+            setMeasuredDimension(width, width)
         } else {
             if (width < height * mRatioWidth / mRatioHeight) {
                 setMeasuredDimension(width, width * mRatioHeight / mRatioWidth)

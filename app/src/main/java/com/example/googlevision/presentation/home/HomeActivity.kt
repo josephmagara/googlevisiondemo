@@ -80,6 +80,15 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        googleVisionCameraPreview?.startPreview()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        googleVisionCameraPreview?.stopPreview()
+    }
     // endregion
 
     // region Public functions

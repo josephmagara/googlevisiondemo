@@ -14,6 +14,9 @@ import android.widget.Toast
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import android.hardware.camera2.CameraAccessException
+
+
 
 
 /**
@@ -36,6 +39,7 @@ class GoogleVisionCameraPreview(
     private var cameraDevice: CameraDevice? = null
     private var surfaceCreated = true
     private var cameraIsConfigured = false
+    private var startedOpeningCamera = false
 
     init {
         cameraPreview.holder?.addCallback(this)
@@ -84,6 +88,7 @@ class GoogleVisionCameraPreview(
 
     @SuppressLint("MissingPermission")
     private fun openCamera() {
+        startedOpeningCamera = true
         val cameraStateCallback = object : CameraDevice.StateCallback() {
             override fun onOpened(camera: CameraDevice) {
                 Toast.makeText(activity, "onOpened", Toast.LENGTH_SHORT).show()
@@ -137,6 +142,32 @@ class GoogleVisionCameraPreview(
             e.printStackTrace()
         }
     }
+    
+    fun stopPreview(){
+        try {
+            if (captureSession != null) {
+                captureSession?.stopRepeating()
+                captureSession?.close()
+                captureSession = null
+            }
+
+            cameraIsConfigured = false
+        } catch (e: CameraAccessException) {
+            // Doesn't matter, closing device anyway
+            e.printStackTrace()
+        } catch (e2: IllegalStateException) {
+            // Doesn't matter, closing device anyway
+            e2.printStackTrace()
+        } finally {
+            if (cameraDevice != null) {
+                cameraDevice?.close()
+                cameraDevice = null
+                captureSession = null
+            }
+        }
+    }
+
+    fun startPreview() = openCamera()
 
     inner class CaptureSessionListener : CameraCaptureSession.StateCallback() {
         override fun onConfigureFailed(session: CameraCaptureSession) {
@@ -144,7 +175,7 @@ class GoogleVisionCameraPreview(
         }
 
         override fun onConfigured(session: CameraCaptureSession) {
-            Timber.d("CaptureSessionConfigure onConfigured");
+            Timber.d("CaptureSessionConfigure onConfigured")
             captureSession = session
 
             try {

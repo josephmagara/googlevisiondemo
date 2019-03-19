@@ -30,10 +30,10 @@ import java.util.*
  */
 
 private val ORIENTATIONS = intArrayOf(
-    Surface.ROTATION_0, 90,
-    Surface.ROTATION_90, 0,
-    Surface.ROTATION_180, 270,
-    Surface.ROTATION_270, 180
+        Surface.ROTATION_0, 90,
+        Surface.ROTATION_90, 0,
+        Surface.ROTATION_180, 270,
+        Surface.ROTATION_270, 180
 )
 
 /**
@@ -41,31 +41,28 @@ private val ORIENTATIONS = intArrayOf(
  * orientation.
  */
 
-
 val permissionList = mapOf(
-    Manifest.permission.CAMERA to CAMERA_PERMISSION_REQUEST_CODE,
-    Manifest.permission.READ_EXTERNAL_STORAGE to READ_STORAGE_PERMISSION_REQUEST_CODE,
-    Manifest.permission.WRITE_EXTERNAL_STORAGE to WRITE_TO_STORAGE_PERMISSION_REQUEST_CODE
+        Manifest.permission.CAMERA to CAMERA_PERMISSION_REQUEST_CODE,
+        Manifest.permission.READ_EXTERNAL_STORAGE to READ_STORAGE_PERMISSION_REQUEST_CODE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE to WRITE_TO_STORAGE_PERMISSION_REQUEST_CODE
 )
 
 fun Activity.hasAllNeededPermissions(permissions: Map<String, Int> = permissionList): Boolean =
-    permissions.keys.all { permissionGranted(this, it) }
+        permissions.keys.all { permissionGranted(this, it) }
 
-fun Activity.requestPermissions(
-    permissions: Map<String, Int> = permissionList
-): Boolean {
+fun Activity.requestPermissions(permissions: Map<String, Int> = permissionList): Boolean {
 
     var requestCode = 1
 
     val nonGrantedPermissionValues = permissions
-        .filter { permission ->
-            !permissionGranted(this, permission.key)
-                .also { isNotGranted ->
-                    if (isNotGranted) {
-                        requestCode *= permission.value
-                    }
-                }
-        }.map { it.key }.toTypedArray()
+            .filter { permission ->
+                !permissionGranted(this, permission.key)
+                        .also { isNotGranted ->
+                            if (isNotGranted) {
+                                requestCode *= permission.value
+                            }
+                        }
+            }.map { it.key }.toTypedArray()
 
     if (nonGrantedPermissionValues.isNotEmpty()) {
         ActivityCompat.requestPermissions(this, nonGrantedPermissionValues, requestCode)
@@ -88,8 +85,8 @@ fun Activity.getRotationCompensation(cameraId: String): Int {
     // 270, rotate the image an additional 180 ((270 + 270) % 360) degrees.
     val cameraManager = getSystemService(CAMERA_SERVICE) as CameraManager
     val sensorOrientation = cameraManager
-        .getCameraCharacteristics(cameraId)
-        .get(CameraCharacteristics.SENSOR_ORIENTATION)!!
+            .getCameraCharacteristics(cameraId)
+            .get(CameraCharacteristics.SENSOR_ORIENTATION)!!
     rotationCompensation = (rotationCompensation + sensorOrientation + 270) % 360
 
     // Return the corresponding FirebaseVisionImageMetadata rotation value.
@@ -111,12 +108,12 @@ fun Activity.createFile(fileName: String): File {
     val timeStamp: String = SimpleDateFormat(DATE_FORMAT).format(Date())
     val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     return File.createTempFile(
-        "JPEG_${fileName}_$timeStamp", /* prefix */
-        ".jpg", /* suffix */
-        storageDir /* directory */
+            "JPEG_${fileName}_$timeStamp", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
     )
 }
 
 
 private fun permissionGranted(context: Context, permission: String) =
-    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+        ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
