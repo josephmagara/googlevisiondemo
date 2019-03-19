@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context.CAMERA_SERVICE
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
+import android.hardware.camera2.CameraCaptureSession.CaptureCallback
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
 import android.opengl.GLSurfaceView
@@ -17,6 +18,12 @@ import android.widget.Toast
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import android.hardware.camera2.CaptureResult
+import android.R.attr.process
+import android.hardware.camera2.TotalCaptureResult
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult.*
+
 
 /**
  * Created by josephmagara on 26/2/19.
@@ -45,8 +52,7 @@ class GoogleVisionCameraPreview(
         cameraPreview.holder?.setKeepScreenOn(true)
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
-    }
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {}
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         cameraSurface = holder.surface
@@ -128,19 +134,19 @@ class GoogleVisionCameraPreview(
 
     private fun configureCamera() {
         // prepare list of surfaces to be used in capture requests
-        val sfl = ArrayList<Surface>()
+        val surfaceList = ArrayList<Surface>()
 
-        sfl.add(cameraSurface)
+        surfaceList.add(cameraSurface)
 
         // configure camera with all the surfaces to be ever used
         try {
-            cameraDevice?.createCaptureSession(sfl, CaptureSessionListener(), null)
+            cameraDevice?.createCaptureSession(surfaceList, CaptureSessionListener(), null)
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
     }
-    
-    fun stopPreview(){
+
+    fun stopPreview() {
         try {
             if (captureSession != null) {
                 captureSession?.stopRepeating()
@@ -179,7 +185,30 @@ class GoogleVisionCameraPreview(
                 val previewRequestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
                 previewRequestBuilder?.let {
                     it.addTarget(cameraSurface)
-                    captureSession?.setRepeatingRequest(it.build(), null, null)
+                    captureSession?.setRepeatingRequest(it.build(), object : CaptureCallback() {
+                        var areWeFocused = false
+                        private fun process(result: CaptureResult) {
+                            when (mState) {
+                                STATE_PREVIEW -> {
+
+                                    val afState = result.get(CONTROL_AF_STATE)!!
+                                    if (CONTROL_AF_TRIGGER_START == afState) {
+                                        if (areWeFocused) {
+                                            //Run specific task here
+                                        }
+                                    }
+                                    areWeFocused = CONTROL_AF_STATE_PASSIVE_FOCUSED == afState
+                                }
+                            }
+                        }
+
+                        override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest,
+                                                         partialResult: CaptureResult) = process(partialResult)
+
+
+                        override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest,
+                                                        result: TotalCaptureResult) = process(result)
+                    }, null)
                 }
             } catch (e: CameraAccessException) {
                 Timber.d("setting up preview failed")
