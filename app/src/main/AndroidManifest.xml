@@ -42,7 +42,7 @@
 
         <meta-data
                 android:name="com.google.firebase.ml.vision.DEPENDENCIES"
-                android:value="ocr, barcode"/>
+                android:value="ocr, barcode, label"/>
     </application>
 
 </manifest>
