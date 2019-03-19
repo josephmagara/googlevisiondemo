@@ -9,7 +9,7 @@ import android.view.SurfaceView
 import android.view.View
 
 class AutoFitSurfaceView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
-    SurfaceView(context, attrs, defStyle) {
+        SurfaceView(context, attrs, defStyle) {
 
     private var mRatioWidth = 0
     private var mRatioHeight = 0

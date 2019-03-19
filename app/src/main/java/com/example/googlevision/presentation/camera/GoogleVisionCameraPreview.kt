@@ -16,9 +16,6 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import android.hardware.camera2.CameraAccessException
 
-
-
-
 /**
  * Created by josephmagara on 26/2/19.
  */
@@ -39,7 +36,6 @@ class GoogleVisionCameraPreview(
     private var cameraDevice: CameraDevice? = null
     private var surfaceCreated = true
     private var cameraIsConfigured = false
-    private var startedOpeningCamera = false
 
     init {
         cameraPreview.holder?.addCallback(this)
@@ -88,7 +84,7 @@ class GoogleVisionCameraPreview(
 
     @SuppressLint("MissingPermission")
     private fun openCamera() {
-        startedOpeningCamera = true
+        Timber.d("Opening camera")
         val cameraStateCallback = object : CameraDevice.StateCallback() {
             override fun onOpened(camera: CameraDevice) {
                 Toast.makeText(activity, "onOpened", Toast.LENGTH_SHORT).show()
