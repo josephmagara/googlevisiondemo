@@ -10,7 +10,7 @@
     tools:context=".presentation.home.HomeActivity">
 
 
-    <android.opengl.GLSurfaceView
+    <com.example.googlevision.presentation.camera.AutoFitSurfaceView
         android:id="@+id/camera_preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

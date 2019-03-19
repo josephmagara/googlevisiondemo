@@ -49,7 +49,7 @@ val permissionList = mapOf(
 )
 
 fun Activity.hasAllNeededPermissions(permissions: Map<String, Int> = permissionList): Boolean =
-    permissions.keys.all { !permissionDenied(this, it) }
+    permissions.keys.all { permissionGranted(this, it) }
 
 fun Activity.requestPermissions(
     permissions: Map<String, Int> = permissionList
@@ -59,7 +59,7 @@ fun Activity.requestPermissions(
 
     val nonGrantedPermissionValues = permissions
         .filter { permission ->
-            permissionDenied(this, permission.key)
+            !permissionGranted(this, permission.key)
                 .also { isNotGranted ->
                     if (isNotGranted) {
                         requestCode *= permission.value
@@ -118,5 +118,5 @@ fun Activity.createFile(fileName: String): File {
 }
 
 
-private fun permissionDenied(context: Context, permission: String) =
-    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED
+private fun permissionGranted(context: Context, permission: String) =
+    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED

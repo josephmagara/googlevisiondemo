@@ -73,7 +73,11 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
             }
         }
 
-        setupCamera()
+        if (this.hasAllNeededPermissions()) {
+            setupCamera()
+        }else{
+            requestPermissions()
+        }
     }
 
     override fun onPause() {
@@ -103,7 +107,7 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
                     }
                 } else if (requestCode.containsPermission()) {
                     if (hasAllNeededPermissions()) {
-                        homeViewModel.triggerAddImageAction()
+                        setupCamera()
                     }
                 }
             }
@@ -119,8 +123,7 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
 
     // region Private functions
     private fun setupCamera() {
-        val googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview)
-        camera_preview.setRenderer(googleVisionCameraPreview)
+        val googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this)
     }
 
     private fun takePhoto() {

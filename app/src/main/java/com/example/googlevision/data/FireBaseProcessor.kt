@@ -12,12 +12,12 @@ abstract class FireBaseProcessor {
 
     fun getFireBaseVisionImage(bitmap: Bitmap, rotation: Int): FirebaseVisionImage {
 
-        val metadata = FirebaseVisionImageMetadata.Builder()
+        /*val metadata = FirebaseVisionImageMetadata.Builder()
             .setWidth(480)
             .setHeight(360)
             .setRotation(rotation)
             .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
-            .build()
+            .build()*/
 
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
