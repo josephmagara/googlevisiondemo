@@ -3,11 +3,12 @@ package com.example.googlevision.presentation.camera
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context.CAMERA_SERVICE
+import android.graphics.ImageFormat
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCaptureSession
-import android.hardware.camera2.CameraCaptureSession.CaptureCallback
 import android.hardware.camera2.CameraDevice
 import android.hardware.camera2.CameraManager
+import android.media.ImageReader
 import android.opengl.GLSurfaceView
 import android.os.Handler
 import android.os.Message
@@ -18,19 +19,13 @@ import android.widget.Toast
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
-import android.hardware.camera2.CaptureResult
-import android.R.attr.process
-import android.hardware.camera2.TotalCaptureResult
-import android.hardware.camera2.CaptureRequest
-import android.hardware.camera2.CaptureResult.*
 
 
 /**
  * Created by josephmagara on 26/2/19.
  */
-class GoogleVisionCameraPreview(
-        cameraPreviewView: SurfaceView,
-        private val activity: Activity) : SurfaceHolder.Callback, GLSurfaceView.Renderer, Handler.Callback {
+class GoogleVisionCameraPreview(cameraPreviewView: SurfaceView, private val activity: Activity) :
+        SurfaceHolder.Callback, GLSurfaceView.Renderer, Handler.Callback {
 
     companion object {
         private const val CAMERA_OPENED = 1
@@ -109,7 +104,7 @@ class GoogleVisionCameraPreview(
             }
         }
 
-        val cameraAvailableCB = object : CameraManager.AvailabilityCallback() {
+        val cameraAvailableCallback = object : CameraManager.AvailabilityCallback() {
             override fun onCameraAvailable(cameraId: String) {
                 super.onCameraAvailable(cameraId)
                 Toast.makeText(activity, "onCameraAvailable", Toast.LENGTH_SHORT).show()
@@ -128,15 +123,20 @@ class GoogleVisionCameraPreview(
             e.printStackTrace()
         }
 
-        cameraManager.registerAvailabilityCallback(cameraAvailableCB, Handler())
+        cameraManager.registerAvailabilityCallback(cameraAvailableCallback, Handler())
     }
 
 
     private fun configureCamera() {
         // prepare list of surfaces to be used in capture requests
-        val surfaceList = ArrayList<Surface>()
+        val imageReader = ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 1)
+        imageReader.setOnImageAvailableListener({
+            it.acquireLatestImage()
+        }, null)
 
-        surfaceList.add(cameraSurface)
+        val surfaceList: MutableList<Surface> = arrayOf(
+                cameraSurface, imageReader.surface).toMutableList()
+
 
         // configure camera with all the surfaces to be ever used
         try {
@@ -158,9 +158,6 @@ class GoogleVisionCameraPreview(
         } catch (e: CameraAccessException) {
             // Doesn't matter, closing device anyway
             e.printStackTrace()
-        } catch (e2: IllegalStateException) {
-            // Doesn't matter, closing device anyway
-            e2.printStackTrace()
         } finally {
             if (cameraDevice != null) {
                 cameraDevice?.close()
@@ -185,30 +182,7 @@ class GoogleVisionCameraPreview(
                 val previewRequestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
                 previewRequestBuilder?.let {
                     it.addTarget(cameraSurface)
-                    captureSession?.setRepeatingRequest(it.build(), object : CaptureCallback() {
-                        var areWeFocused = false
-                        private fun process(result: CaptureResult) {
-                            when (mState) {
-                                STATE_PREVIEW -> {
-
-                                    val afState = result.get(CONTROL_AF_STATE)!!
-                                    if (CONTROL_AF_TRIGGER_START == afState) {
-                                        if (areWeFocused) {
-                                            //Run specific task here
-                                        }
-                                    }
-                                    areWeFocused = CONTROL_AF_STATE_PASSIVE_FOCUSED == afState
-                                }
-                            }
-                        }
-
-                        override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest,
-                                                         partialResult: CaptureResult) = process(partialResult)
-
-
-                        override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest,
-                                                        result: TotalCaptureResult) = process(result)
-                    }, null)
+                    captureSession?.setRepeatingRequest(it.build(), null, null)
                 }
             } catch (e: CameraAccessException) {
                 Timber.d("setting up preview failed")

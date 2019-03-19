@@ -2,7 +2,6 @@ package com.example.googlevision.data
 
 import android.graphics.Bitmap
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
-import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
 import java.io.ByteArrayOutputStream
 
 /**
@@ -16,12 +15,11 @@ abstract class FireBaseProcessor {
             .setWidth(480)
             .setHeight(360)
             .setRotation(rotation)
-            .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
+            .setFormat(FirebaseVisionImageMetadata.YUV_420_888)
             .build()*/
 
         val stream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-
 
         return FirebaseVisionImage.fromBitmap(bitmap)
     }
