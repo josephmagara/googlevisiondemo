@@ -5,7 +5,7 @@ package com.example.googlevision.util.extensions
  */
 
 fun String.withDefaultValueIfNeeded(): String {
-    if (this.isEmpty()){
+    if (this.isBlank()){
         return "Empty string"
     }
     return this

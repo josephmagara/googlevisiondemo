@@ -131,7 +131,8 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
         }
     }
 
-    override fun onImageReceived(image: Image) = homeViewModel.processImage(image)
+    override fun onImageReceived(image: Image, cameraId: String) =
+        homeViewModel.queueImageForProcessing(image, getRotationCompensation(cameraId))
 
     // endregion
 

@@ -43,6 +43,7 @@ class GoogleVisionCameraPreview(cameraPreviewView: SurfaceView,
     private var cameraDevice: CameraDevice? = null
     private var surfaceCreated = true
     private var cameraIsConfigured = false
+    private var currentCameraId: String = ""
 
     init {
         cameraPreview.holder?.addCallback(this)
@@ -121,7 +122,8 @@ class GoogleVisionCameraPreview(cameraPreviewView: SurfaceView,
         }
 
         try {
-            cameraManager.openCamera(cameraManager.cameraIdList[0], cameraStateCallback, Handler())
+            currentCameraId = cameraManager.cameraIdList[0]
+            cameraManager.openCamera(currentCameraId, cameraStateCallback, Handler())
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
@@ -134,7 +136,7 @@ class GoogleVisionCameraPreview(cameraPreviewView: SurfaceView,
         // prepare list of surfaces to be used in capture requests
         val imageReader = ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 1)
         imageReader.setOnImageAvailableListener({
-            imageRetrievalPipeline.onImageReceived(it.acquireLatestImage())
+            imageRetrievalPipeline.onImageReceived(it.acquireLatestImage(), currentCameraId)
         }, null)
 
         val surfaceList: MutableList<Surface> = arrayOf(
@@ -157,6 +159,7 @@ class GoogleVisionCameraPreview(cameraPreviewView: SurfaceView,
                 captureSession = null
             }
 
+            currentCameraId = ""
             cameraIsConfigured = false
         } catch (e: CameraAccessException) {
             // Doesn't matter, closing device anyway

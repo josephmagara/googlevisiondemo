@@ -10,11 +10,14 @@ import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActio
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
 import com.example.googlevision.domain.models.GvBarcode
 import com.example.googlevision.domain.usecases.ProcessBarcodeUseCase
+import com.example.googlevision.presentation.home.models.ImageProcessingTask
 import com.example.googlevision.util.extensions.cast
-import io.reactivex.Completable
+import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -32,26 +35,46 @@ class HomeViewModel @Inject constructor(
         private const val IMAGE_CAPTURE_DELAY = 1000L
     }
 
-    private var addImageAction = MutableLiveData<Any>()
     private var captureImage = MutableLiveData<Any>()
+    private var addImageAction = MutableLiveData<Any>()
     private var processedText = MutableLiveData<String>()
+    private val imageProcessingTaskList = mutableListOf<ImageProcessingTask>()
+
+    private var compositeDisposable = CompositeDisposable()
     private var imageProcessedDisposable = Disposables.disposed()
     private var barcodeProcessedDisposable = Disposables.disposed()
-    private var imageCaptureTimer = Disposables.disposed()
+    private var imageProcessingTaskListObserver = Disposables.disposed()
 
     init {
-        imageProcessedDisposable = imageProcessorObserver.imageProcessResultObserver()
+
+        imageProcessingTaskListObserver = Observable.fromIterable(imageProcessingTaskList)
+            .delay(200, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.computation())
             .subscribe {
-                processedText.value = it.text
+                Timber.v("Starting to import image")
+                imageProcessActioner.processImage(it.image, it.rotation)
             }
+
+        imageProcessedDisposable = imageProcessorObserver.imageProcessResultObserver()
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeOn(Schedulers.computation())
+            .subscribe { label ->
+                val stringBuilder = StringBuilder()
+                label.forEach {
+                    stringBuilder.append(it.text + " ")
+                }
+                processedText.value = stringBuilder.toString()
+            }
+
         barcodeProcessedDisposable = processBarcodeUseCase.results()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.computation())
             .subscribe {
                 processedText.value = formatBarcodesForDisplay(it)
             }
+
+        compositeDisposable.addAll(imageProcessingTaskListObserver, imageProcessedDisposable, barcodeProcessedDisposable)
     }
 
     private fun formatBarcodesForDisplay(barcodes: List<GvBarcode>): String {
@@ -85,20 +108,8 @@ class HomeViewModel @Inject constructor(
 
     fun processedText(): LiveData<String> = processedText
 
-    fun stopImageCaptureTimer() = imageCaptureTimer.dispose()
-
-    fun startImageCaptureTimer(){
-        imageCaptureTimer.dispose()
-        imageCaptureTimer = Completable.timer(IMAGE_CAPTURE_DELAY, TimeUnit.MILLISECONDS)
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.computation())
-            .subscribe {
-                captureImage.value = true
-            }
-    }
-
-    fun processImage(image: Image){
-
+    fun queueImageForProcessing(image: Image, rotation: Int) {
+        imageProcessingTaskList.add(ImageProcessingTask(image, rotation))
     }
 
     fun extractTextFromImage(bitmap: Bitmap, imageRotation: Int) =
