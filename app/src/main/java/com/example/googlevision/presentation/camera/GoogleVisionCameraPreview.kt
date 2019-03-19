@@ -115,7 +115,7 @@ class GoogleVisionCameraPreview(
         }
 
         try {
-            cameraManager.openCamera(cameraManager.cameraIdList[1], cameraStateCallback, Handler())
+            cameraManager.openCamera(cameraManager.cameraIdList[0], cameraStateCallback, Handler())
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
