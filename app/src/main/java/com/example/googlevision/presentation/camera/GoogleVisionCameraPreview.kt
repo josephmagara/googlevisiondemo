@@ -89,7 +89,7 @@ class GoogleVisionCameraPreview(
                 Toast.makeText(activity, "onOpened", Toast.LENGTH_SHORT).show()
                 cameraDevice = camera
 
-                messageHandler.sendEmptyMessage(CAMERA_OPENED);
+                messageHandler.sendEmptyMessage(CAMERA_OPENED)
             }
 
             override fun onDisconnected(camera: CameraDevice) {
