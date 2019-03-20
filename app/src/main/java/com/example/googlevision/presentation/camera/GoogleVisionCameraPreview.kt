@@ -135,15 +135,18 @@ class GoogleVisionCameraPreview(
 
 	private fun configureCamera() {
 		// prepare list of surfaces to be used in capture requests
-		val imageReader = ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 1)
+		val imageReader = ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 50)
 		imageReader.setOnImageAvailableListener({
 			val image = it.acquireLatestImage()
-			val buffer = image.planes[0].buffer
-			val bytes = ByteArray(buffer.remaining())
-			buffer.get(bytes)
-			imageRetrievalPipeline.onImageReceived(bytes, currentCameraId)
+			if (image != null){
+				Toast.makeText(activity, "Photo taken", Toast.LENGTH_SHORT).show()
+				val buffer = image.planes[0].buffer
+				val bytes = ByteArray(buffer.remaining())
+				buffer.get(bytes)
+				imageRetrievalPipeline.onImageReceived(bytes, currentCameraId)
 
-			it.close()
+				image.close()
+			}
 		}, null)
 
 		val surfaceList: MutableList<Surface> = arrayOf(
