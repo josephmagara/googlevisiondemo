@@ -34,7 +34,7 @@ class MotionDetector(activity: Activity) : SensorEventListener {
             if (value) {
 
                 if (delayTimerDisposable.isDisposed) {
-                    delayTimerDisposable = Completable.timer(700L, TimeUnit.MILLISECONDS)
+                    delayTimerDisposable = Completable.timer(1000L, TimeUnit.MILLISECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribeOn(Schedulers.computation())
                         .subscribe {
