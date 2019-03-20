@@ -22,6 +22,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
 import com.example.googlevision.presentation.ImageRetrievalPipeline
+import com.example.googlevision.presentation.MotionDetector
 import com.example.googlevision.presentation.camera.GoogleVisionCameraPreview
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.extensions.*
@@ -41,10 +42,14 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     private var filepath: String? = null
     private var googleVisionCameraPreview: GoogleVisionCameraPreview? = null
+    private var motionDetector : MotionDetector? = null
+
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
+
+        motionDetector = MotionDetector(this)
 
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
                 .get(HomeViewModel::class.java)
@@ -87,12 +92,14 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
         super.onResume()
         Timber.v("Starting preview")
         googleVisionCameraPreview?.startPreview()
+        motionDetector?.registerListener()
     }
 
     override fun onPause() {
         super.onPause()
         Timber.v("Stopping preview")
         googleVisionCameraPreview?.stopPreview()
+        motionDetector?.unRegisterListener()
     }
     // endregion
 
@@ -138,7 +145,7 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     // region Private functions
     private fun setupCamera() {
-        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this, this)
+        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this, motionDetector, this)
     }
 
     private fun takePhoto() {
