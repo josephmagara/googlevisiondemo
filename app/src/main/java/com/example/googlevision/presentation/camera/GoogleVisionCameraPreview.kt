@@ -150,9 +150,7 @@ class GoogleVisionCameraPreview(
             }
         }, null)
 
-        val surfaceList: MutableList<Surface> = arrayOf(
-            cameraSurface, imageReader.surface
-        ).toMutableList()
+        val surfaceList = listOf(cameraSurface, imageReader.surface)
 
         // configure camera with all the surfaces to be ever used
         try {
