@@ -74,7 +74,11 @@ class HomeViewModel @Inject constructor(
                 processedText.value = formatBarcodesForDisplay(it)
             }
 
-        compositeDisposable.addAll(imageProcessingTaskListObserver, imageProcessedDisposable, barcodeProcessedDisposable)
+        compositeDisposable.addAll(
+            imageProcessingTaskListObserver,
+            imageProcessedDisposable,
+            barcodeProcessedDisposable
+        )
     }
 
     private fun formatBarcodesForDisplay(barcodes: List<GvBarcode>): String {

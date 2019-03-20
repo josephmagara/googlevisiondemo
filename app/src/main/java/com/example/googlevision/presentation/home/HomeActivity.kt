@@ -41,7 +41,7 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     private var filepath: String? = null
     private var googleVisionCameraPreview: GoogleVisionCameraPreview? = null
-    private var motionDetector : MotionDetector? = null
+    private var motionDetector: MotionDetector? = null
 
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +51,7 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
         motionDetector = MotionDetector(this)
 
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
-                .get(HomeViewModel::class.java)
+            .get(HomeViewModel::class.java)
 
         homeViewModel.addImageAction().observe(this, Observer {
             takePhoto()
@@ -162,9 +162,9 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
                 photoFile?.also {
                     filepath = it.absolutePath
                     val photoURI: Uri = FileProvider.getUriForFile(
-                            this,
-                            "${BuildConfig.APPLICATION_ID}.provider",
-                            it
+                        this,
+                        "${BuildConfig.APPLICATION_ID}.provider",
+                        it
                     )
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     takePictureIntent.putExtra("filepath", it.absolutePath)

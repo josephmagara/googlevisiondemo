@@ -59,7 +59,7 @@ class ImageProcessor @Inject constructor() : FireBaseProcessor(), ImageProcessAc
             }
     }
 
-    override fun imageProcessResultObserver(): Observable<List<FirebaseVisionImageLabel>> = resultProcessor.toObservable()
-
+    override fun imageProcessResultObserver(): Observable<List<FirebaseVisionImageLabel>> =
+        resultProcessor.toObservable()
 
 }
