@@ -137,7 +137,13 @@ class GoogleVisionCameraPreview(
 		// prepare list of surfaces to be used in capture requests
 		val imageReader = ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 1)
 		imageReader.setOnImageAvailableListener({
-			imageRetrievalPipeline.onImageReceived(it.acquireLatestImage(), currentCameraId)
+			val image = it.acquireLatestImage()
+			val buffer = image.planes[0].buffer
+			val bytes = ByteArray(buffer.remaining())
+			buffer.get(bytes)
+			imageRetrievalPipeline.onImageReceived(bytes, currentCameraId)
+
+			it.close()
 		}, null)
 
 		val surfaceList: MutableList<Surface> = arrayOf(
@@ -201,8 +207,8 @@ class GoogleVisionCameraPreview(
 									//Run specific task here
 									val singleRequest = currentSession.device
 										.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
-
-									//singleRequest.addTarget(imageReader.surface)
+									singleRequest.addTarget(cameraSurface)
+									singleRequest.addTarget(imageReader.surface)
 									session.capture(singleRequest.build(), null, null)
 								}
 							}

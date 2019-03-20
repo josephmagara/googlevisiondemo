@@ -1,7 +1,6 @@
 package com.example.googlevision.data.imageprocessor
 
 import android.graphics.Bitmap
-import android.media.Image
 import com.example.googlevision.data.FireBaseProcessor
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
@@ -25,7 +24,7 @@ class ImageProcessor @Inject constructor() : FireBaseProcessor(), ImageProcessAc
     private val resultProcessor = PublishProcessor.create<List<FirebaseVisionImageLabel>>()
 
     override fun extractTextFromImage(bitmap: Bitmap, rotation: Int) {
-        val firebaseVisionImage = getFireBaseVisionBitmap(bitmap)
+        val firebaseVisionImage = getFireBaseVisionFromBitmap(bitmap)
 
         val detector = FirebaseVision.getInstance()
             .onDeviceTextRecognizer
@@ -40,8 +39,8 @@ class ImageProcessor @Inject constructor() : FireBaseProcessor(), ImageProcessAc
             }
     }
 
-    override fun processImage(image: Image, rotation: Int) {
-        val firebaseVisionImage = getFireBaseVisionImage(image, rotation)
+    override fun processImage(byteArray: ByteArray, rotation: Int) {
+        val firebaseVisionImage = getFireBaseVisionFromByteArray(byteArray, rotation)
 
         val options = FirebaseVisionOnDeviceImageLabelerOptions.Builder()
             .setConfidenceThreshold(0.7f)

@@ -1,7 +1,6 @@
 package com.example.googlevision.presentation.home
 
 import android.graphics.Bitmap
-import android.media.Image
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,10 +11,10 @@ import com.example.googlevision.domain.models.GvBarcode
 import com.example.googlevision.domain.usecases.ProcessBarcodeUseCase
 import com.example.googlevision.presentation.home.models.ImageProcessingTask
 import com.example.googlevision.util.extensions.cast
-import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposables
+import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
@@ -32,28 +31,29 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private const val IMAGE_CAPTURE_DELAY = 1000L
+        private const val IMAGE_CAPTURE_DELAY = 200L
     }
 
     private var captureImage = MutableLiveData<Any>()
     private var addImageAction = MutableLiveData<Any>()
     private var processedText = MutableLiveData<String>()
-    private val imageProcessingTaskList = mutableListOf<ImageProcessingTask>()
 
     private var compositeDisposable = CompositeDisposable()
     private var imageProcessedDisposable = Disposables.disposed()
     private var barcodeProcessedDisposable = Disposables.disposed()
     private var imageProcessingTaskListObserver = Disposables.disposed()
 
+    private val imageProcessingTaskPublishProcessor: PublishProcessor<ImageProcessingTask> = PublishProcessor.create()
+
     init {
 
-        imageProcessingTaskListObserver = Observable.fromIterable(imageProcessingTaskList)
-            .delay(200, TimeUnit.MILLISECONDS)
+        imageProcessingTaskListObserver = imageProcessingTaskPublishProcessor.toObservable()
+            .delay(IMAGE_CAPTURE_DELAY, TimeUnit.MILLISECONDS)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.computation())
             .subscribe {
                 Timber.v("Starting to import image")
-                imageProcessActioner.processImage(it.image, it.rotation)
+                imageProcessActioner.processImage(it.byteArray, it.rotation)
             }
 
         imageProcessedDisposable = imageProcessorObserver.imageProcessResultObserver()
@@ -108,9 +108,8 @@ class HomeViewModel @Inject constructor(
 
     fun processedText(): LiveData<String> = processedText
 
-    fun queueImageForProcessing(image: Image, rotation: Int) {
-        imageProcessingTaskList.add(ImageProcessingTask(image, rotation))
-    }
+    fun queueImageForProcessing(byteArray: ByteArray, rotation: Int) =
+        imageProcessingTaskPublishProcessor.onNext(ImageProcessingTask(byteArray, rotation))
 
     fun extractTextFromImage(bitmap: Bitmap, imageRotation: Int) =
         imageProcessActioner.extractTextFromImage(bitmap, imageRotation)

@@ -21,7 +21,7 @@ class BarcodeProcessor @Inject constructor() : FireBaseProcessor(), BarcodeProce
 
     override fun extractInformationFromBarcode(barcodeBitmap: Bitmap, rotation: Int) {
 
-        val firebaseVisionImage = getFireBaseVisionBitmap(barcodeBitmap)
+        val firebaseVisionImage = getFireBaseVisionFromBitmap(barcodeBitmap)
 
         val detector = FirebaseVision.getInstance()
             .visionBarcodeDetector

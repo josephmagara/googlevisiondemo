@@ -7,7 +7,12 @@ import android.hardware.Sensor.TYPE_ACCELEROMETER
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import io.reactivex.Completable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposables
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 
 /**
  * Created by josephmagara on 20/3/19.
@@ -16,6 +21,7 @@ class MotionDetector(activity: Activity) : SensorEventListener {
 
     private val sensorManager: SensorManager = activity.getSystemService(SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER)
+    private var delayTimerDisposable = Disposables.disposed()
 
     private var gravity = floatArrayOf()
     private var acceleration = 0.00f
@@ -25,9 +31,19 @@ class MotionDetector(activity: Activity) : SensorEventListener {
     var deviceIsStill: Boolean = false
         set(value) {
             Timber.d("We are moving: $value")
-            if (value){
+            if (value) {
 
-            }else{
+                if (delayTimerDisposable.isDisposed) {
+                    delayTimerDisposable = Completable.timer(1000L, TimeUnit.MILLISECONDS)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeOn(Schedulers.computation())
+                        .subscribe {
+                            field = value
+                        }
+                }
+
+            } else {
+                delayTimerDisposable.dispose()
                 field = value
             }
         }
