@@ -14,7 +14,7 @@ import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.widget.Toast
 import com.example.googlevision.presentation.ImageRetrievalPipeline
-import com.example.googlevision.presentation.MotionDetector
+import com.example.googlevision.presentation.motiondectection.MotionDetector
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -142,13 +142,15 @@ class GoogleVisionCameraPreview(
     private fun configureCamera() {
         // prepare list of surfaces to be used in capture requests
         val imageReader =
-            ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 50)
+            ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 10)
         imageReader.setOnImageAvailableListener({
             processingForLastPhotoCompleted = false
             val image = it.acquireLatestImage()
             if (image != null) {
                 Toast.makeText(activity, "Photo taken", Toast.LENGTH_SHORT).show()
                 imageRetrievalPipeline.onImageReceived(image, currentCameraId)
+
+                motionDetector?.invalidateDeviceIsStillFlag()
             } else {
                 processingForLastPhotoCompleted = true
             }
@@ -214,7 +216,6 @@ class GoogleVisionCameraPreview(
                             val autoFocusState = result.get(CaptureResult.CONTROL_AF_STATE)
                             if (CaptureResult.CONTROL_AF_TRIGGER_START == autoFocusState) {
                                 if (canTakePhoto) {
-                                    //Run specific task here
                                     val singleRequest = currentSession.device
                                         .createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)
                                     singleRequest.addTarget(cameraSurface)

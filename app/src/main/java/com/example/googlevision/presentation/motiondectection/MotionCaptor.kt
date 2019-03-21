@@ -1,0 +1,51 @@
+package com.example.googlevision.presentation.motiondectection
+
+import io.reactivex.Observable
+import io.reactivex.processors.PublishProcessor
+import javax.inject.Singleton
+
+/**
+ * Created by josephmagara on 21/3/19.
+ */
+@Singleton
+class MotionCaptor {
+    private var previousXPosition: Float = 0f
+    private var previousYPosition: Float = 0f
+    private var previousZPosition: Float = 0f
+
+    private val significantPauseOccurredPublisher: PublishProcessor<Boolean> = PublishProcessor.create()
+
+    private fun computeNewMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
+        if (newXPosition in previousXPosition.minus(0.5f)..previousXPosition.plus(0.5f) &&
+            newYPosition in previousYPosition.minus(0.5f)..previousYPosition.plus(0.5f) &&
+            newZPosition in previousZPosition.minus(0.5f)..previousZPosition.plus(0.5f)) {
+            significantPauseOccurredPublisher.onNext(true)
+        }else{
+            significantPauseOccurredPublisher.onNext(false)
+        }
+
+        setNewCoordinates(newXPosition, newYPosition, newZPosition)
+    }
+
+    private fun setNewCoordinates(newXPosition: Float, newYPosition: Float, newZPosition: Float){
+        previousXPosition = newXPosition
+        previousYPosition = newYPosition
+        previousZPosition = newZPosition
+    }
+
+    private fun hasNotBeenInitialized(): Boolean =
+        arrayOf(previousXPosition, previousYPosition, previousZPosition).all { it == 0f }
+
+    fun significantPauseOccurred(): Observable<Boolean> = significantPauseOccurredPublisher.toObservable()
+
+    fun captureMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
+
+        if (hasNotBeenInitialized()) {
+            setNewCoordinates(newXPosition, newYPosition, newZPosition)
+            significantPauseOccurredPublisher.onNext(false)
+        } else {
+            computeNewMotion(newXPosition, newYPosition, newZPosition)
+        }
+    }
+
+}

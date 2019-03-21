@@ -44,7 +44,7 @@ class ImageProcessor @Inject constructor() : FireBaseProcessor(), ImageProcessAc
         val firebaseVisionImage = getFireBaseVisionFromImage(image, rotation)
 
         val options = FirebaseVisionOnDeviceImageLabelerOptions.Builder()
-            .setConfidenceThreshold(0.2f)
+            .setConfidenceThreshold(0.5f)
             .build()
 
         val labeler = FirebaseVision.getInstance()

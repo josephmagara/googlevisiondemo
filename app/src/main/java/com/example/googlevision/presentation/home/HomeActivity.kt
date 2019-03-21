@@ -22,8 +22,8 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
 import com.example.googlevision.presentation.ImageRetrievalPipeline
-import com.example.googlevision.presentation.MotionDetector
 import com.example.googlevision.presentation.camera.GoogleVisionCameraPreview
+import com.example.googlevision.presentation.motiondectection.MotionDetector
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.extensions.*
 import dagger.android.support.DaggerAppCompatActivity
