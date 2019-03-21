@@ -14,20 +14,28 @@ class MotionCaptor {
     private var previousZPosition: Float = 0f
 
     private val significantPauseOccurredPublisher: PublishProcessor<Boolean> = PublishProcessor.create()
+    private val motionCaptureStore = MotionCaptureStore()
 
     private fun computeNewMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
         if (newXPosition in previousXPosition.minus(0.5f)..previousXPosition.plus(0.5f) &&
             newYPosition in previousYPosition.minus(0.5f)..previousYPosition.plus(0.5f) &&
-            newZPosition in previousZPosition.minus(0.5f)..previousZPosition.plus(0.5f)) {
+            newZPosition in previousZPosition.minus(0.5f)..previousZPosition.plus(0.5f)
+        ) {
+            updateMotionCapture(newXPosition, newYPosition, newZPosition)
             significantPauseOccurredPublisher.onNext(true)
-        }else{
+        } else {
+            motionCaptureStore.invalidateStore()
             significantPauseOccurredPublisher.onNext(false)
         }
 
         setNewCoordinates(newXPosition, newYPosition, newZPosition)
     }
 
-    private fun setNewCoordinates(newXPosition: Float, newYPosition: Float, newZPosition: Float){
+    private fun updateMotionCapture(newXPosition: Float, newYPosition: Float, newZPosition: Float) =
+        motionCaptureStore.addMotionPointToStore(MotionPoint(newXPosition, newYPosition, newZPosition))
+
+
+    private fun setNewCoordinates(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
         previousXPosition = newXPosition
         previousYPosition = newYPosition
         previousZPosition = newZPosition
