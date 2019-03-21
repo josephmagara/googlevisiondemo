@@ -45,6 +45,12 @@ class GoogleVisionCameraPreview(
     private var surfaceCreated = true
     private var cameraIsConfigured = false
     private var currentCameraId: String = ""
+    private var processingForLastPhotoCompleted: Boolean = true
+
+    private val canTakePhoto: Boolean
+        get() {
+            return motionDetector?.deviceIsStill == true && processingForLastPhotoCompleted
+        }
 
     init {
         cameraPreview.holder?.addCallback(this)
@@ -138,15 +144,13 @@ class GoogleVisionCameraPreview(
         val imageReader =
             ImageReader.newInstance(cameraPreview.width, cameraPreview.height, ImageFormat.YUV_420_888, 50)
         imageReader.setOnImageAvailableListener({
+            processingForLastPhotoCompleted = false
             val image = it.acquireLatestImage()
             if (image != null) {
                 Toast.makeText(activity, "Photo taken", Toast.LENGTH_SHORT).show()
-                val buffer = image.planes[0].buffer
-                val bytes = ByteArray(buffer.remaining())
-                buffer.get(bytes)
-                imageRetrievalPipeline.onImageReceived(bytes, currentCameraId)
-
-                image.close()
+                imageRetrievalPipeline.onImageReceived(image, currentCameraId)
+            } else {
+                processingForLastPhotoCompleted = true
             }
         }, null)
 
@@ -184,6 +188,10 @@ class GoogleVisionCameraPreview(
 
     fun startPreview() = openCamera()
 
+    fun finishedProcessingLastImage() {
+        processingForLastPhotoCompleted = true
+    }
+
     inner class CaptureSessionListener(private val imageReader: ImageReader) : CameraCaptureSession.StateCallback() {
         override fun onConfigureFailed(session: CameraCaptureSession) {
             Timber.d("CaptureSessionConfigure failed")
@@ -205,7 +213,7 @@ class GoogleVisionCameraPreview(
                         private fun process(result: CaptureResult, currentSession: CameraCaptureSession) {
                             val autoFocusState = result.get(CaptureResult.CONTROL_AF_STATE)
                             if (CaptureResult.CONTROL_AF_TRIGGER_START == autoFocusState) {
-                                if (motionDetector?.deviceIsStill == true) {
+                                if (canTakePhoto) {
                                     //Run specific task here
                                     val singleRequest = currentSession.device
                                         .createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE)

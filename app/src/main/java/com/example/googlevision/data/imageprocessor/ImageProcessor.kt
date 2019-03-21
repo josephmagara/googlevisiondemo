@@ -1,6 +1,7 @@
 package com.example.googlevision.data.imageprocessor
 
 import android.graphics.Bitmap
+import android.media.Image
 import com.example.googlevision.data.FireBaseProcessor
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
@@ -39,8 +40,8 @@ class ImageProcessor @Inject constructor() : FireBaseProcessor(), ImageProcessAc
             }
     }
 
-    override fun processImage(byteArray: ByteArray, rotation: Int) {
-        val firebaseVisionImage = getFireBaseVisionFromByteArray(byteArray, rotation)
+    override fun processImage(image: Image, rotation: Int) {
+        val firebaseVisionImage = getFireBaseVisionFromImage(image, rotation)
 
         val options = FirebaseVisionOnDeviceImageLabelerOptions.Builder()
             .setConfidenceThreshold(0.2f)
@@ -53,6 +54,7 @@ class ImageProcessor @Inject constructor() : FireBaseProcessor(), ImageProcessAc
             .addOnSuccessListener { labels ->
                 Timber.d(firebaseVisionImage.toString().withDefaultValueIfNeeded())
                 resultProcessor.onNext(labels)
+                image.close()
             }
             .addOnFailureListener {
                 resultProcessor.onError(it)

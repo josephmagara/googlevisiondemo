@@ -11,6 +11,7 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata.LENS_FACING_FRONT
+import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -68,8 +69,12 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
         })
 
         homeViewModel.processedText().observe(this, Observer { text ->
-            Timber.v("Incoming text: $text")
+            Timber.d("Incoming text: $text")
             extracted_text.text = text
+        })
+
+        homeViewModel.imageProcessingCompleted().observe(this, Observer {
+            googleVisionCameraPreview?.finishedProcessingLastImage()
         })
 
         add_button.setOnClickListener {
@@ -137,8 +142,8 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
         }
     }
 
-    override fun onImageReceived(byteArray: ByteArray, cameraId: String) =
-        homeViewModel.queueImageForProcessing(byteArray, getRotationCompensation(cameraId))
+    override fun onImageReceived(image: Image, cameraId: String) =
+        homeViewModel.queueImageForProcessing(image, getRotationCompensation(cameraId))
 
     // endregion
 

@@ -1,6 +1,7 @@
 package com.example.googlevision.presentation.home
 
 import android.graphics.Bitmap
+import android.media.Image
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -37,6 +38,7 @@ class HomeViewModel @Inject constructor(
     private var captureImage = MutableLiveData<Any>()
     private var addImageAction = MutableLiveData<Any>()
     private var processedText = MutableLiveData<String>()
+    private var imageProcessingCompleted = MutableLiveData<Any>()
 
     private var compositeDisposable = CompositeDisposable()
     private var imageProcessedDisposable = Disposables.disposed()
@@ -53,7 +55,7 @@ class HomeViewModel @Inject constructor(
             .subscribeOn(Schedulers.computation())
             .subscribe {
                 Timber.v("Starting to import image")
-                imageProcessActioner.processImage(it.byteArray, it.rotation)
+                imageProcessActioner.processImage(it.image, it.rotation)
             }
 
         imageProcessedDisposable = imageProcessorObserver.imageProcessResultObserver()
@@ -65,6 +67,7 @@ class HomeViewModel @Inject constructor(
                     stringBuilder.append(it.text + " ")
                 }
                 processedText.value = stringBuilder.toString()
+                imageProcessingCompleted.value = true
             }
 
         barcodeProcessedDisposable = processBarcodeUseCase.results()
@@ -112,8 +115,10 @@ class HomeViewModel @Inject constructor(
 
     fun processedText(): LiveData<String> = processedText
 
-    fun queueImageForProcessing(byteArray: ByteArray, rotation: Int) =
-        imageProcessingTaskPublishProcessor.onNext(ImageProcessingTask(byteArray, rotation))
+    fun imageProcessingCompleted(): LiveData<Any> = imageProcessingCompleted
+
+    fun queueImageForProcessing(image: Image, rotation: Int) =
+        imageProcessingTaskPublishProcessor.onNext(ImageProcessingTask(image, rotation))
 
     fun extractTextFromImage(bitmap: Bitmap, imageRotation: Int) =
         imageProcessActioner.extractTextFromImage(bitmap, imageRotation)
