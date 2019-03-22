@@ -1,6 +1,7 @@
 package com.example.googlevision.presentation.motiondectection
 
 import com.example.googlevision.util.extensions.containsGradualMotionEvent
+import com.example.googlevision.util.extensions.containsStopAfterGradualMotionEvent
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
 import javax.inject.Singleton
@@ -23,8 +24,10 @@ class MotionCaptor {
             newZPosition in previousZPosition.minus(0.5f)..previousZPosition.plus(0.5f)
         ) {
             updateMotionCaptureStore(newXPosition, newYPosition, newZPosition)
-            if(!isGraduallyMoving()) {
-                significantPauseOccurredPublisher.onNext(true)
+            if(isGraduallyMoving()) {
+                significantPauseOccurredPublisher.onNext(false)
+            }else if (hasStoppedGraduallyMoving()){
+                significantPauseOccurredPublisher.onNext(false)
             }
         } else {
             motionCaptureStore.invalidateStore()
@@ -35,6 +38,8 @@ class MotionCaptor {
     }
 
     private fun isGraduallyMoving(): Boolean = motionCaptureStore.containsGradualMotionEvent()
+
+    private fun hasStoppedGraduallyMoving(): Boolean = motionCaptureStore.containsStopAfterGradualMotionEvent()
 
     private fun updateMotionCaptureStore(newXPosition: Float, newYPosition: Float, newZPosition: Float) =
         motionCaptureStore.addMotionPointToStore(MotionPoint(newXPosition, newYPosition, newZPosition))

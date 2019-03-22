@@ -8,15 +8,15 @@ private val yMotionList: MutableList<Boolean> = mutableListOf()
 private val zMotionList: MutableList<Boolean> = mutableListOf()
 
 fun MotionCaptureStore.containsGradualMotionEvent(clearResults: Boolean = true): Boolean =
-    if (motionPointList.size < 10) {
-        false
-    } else {
-        val results = checkForGradualMotion(motionPointList)
-        if (clearResults) {
-            clearLists()
+        if (motionPointList.size < 10) {
+            false
+        } else {
+            val results = checkForGradualMotion(motionPointList)
+            if (clearResults) {
+                clearLists()
+            }
+            results.any { it }
         }
-        results.any { it }
-    }
 
 
 fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
@@ -33,18 +33,47 @@ fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
         val zList = mutableListOf<Float>()
 
         motionPointList.forEach { motionPoint ->
-            with(motionPoint){
-                if(results[0])
+            with(motionPoint) {
+                if (results[0])
                     xList.add(xPosition)
-                if(results[1])
+                if (results[1])
                     yList.add(yPosition)
-                if(results[2])
+                if (results[2])
                     zList.add(zPosition)
             }
         }
 
-        return true
+        val xMovementHasStopped = if (!xList.any()) {
+            true
+        } else {
+            lastFiveMovesContainStopEvent(xList)
+        }
+
+        val yMovementHasStopped = if (!yList.any()) {
+            true
+        } else {
+            lastFiveMovesContainStopEvent(yList)
+        }
+
+        val zMovementHasStopped = if (!zList.any()) {
+            true
+        } else {
+            lastFiveMovesContainStopEvent(zList)
+        }
+
+        return xMovementHasStopped && yMovementHasStopped && zMovementHasStopped
     }
+}
+
+private fun lastFiveMovesContainStopEvent(list: List<Float>): Boolean {
+    val lastMovement = list.last()
+
+    val motionStopList = mutableListOf<Boolean>()
+    list.takeLast(5).forEach {
+        motionStopList.add(lastMovement in it.minus(0.25f)..it.minus(0.25f))
+    }
+
+    return motionStopList.count { it } > motionStopList.count { !it }
 }
 
 private fun checkForGradualMotion(motionPointList: List<MotionPoint>): List<Boolean> {
@@ -65,9 +94,9 @@ private fun checkForGradualMotion(motionPointList: List<MotionPoint>): List<Bool
 }
 
 private fun compareMovementsAcrossAxises(
-    xList: List<Boolean>,
-    yList: List<Boolean>,
-    zList: List<Boolean>
+        xList: List<Boolean>,
+        yList: List<Boolean>,
+        zList: List<Boolean>
 ): List<Boolean> {
     val graduallyMovingAlongX = xList.count { it } > xList.count { !it }
     val graduallyMovingAlongY = yList.count { it } > yList.count { !it }
