@@ -21,7 +21,7 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
 import timber.log.Timber
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
 
 
 /**
@@ -77,7 +77,7 @@ fun Activity.getRotationCompensation(cameraId: String): Int {
     // Then, from the ORIENTATIONS table, look up the angle the image must be
     // rotated to compensate for the device's rotation.
     val deviceRotation = windowManager.defaultDisplay.rotation
-    var rotationCompensation = ORIENTATIONS.get(deviceRotation)
+    var rotationCompensation = ORIENTATIONS[deviceRotation]
 
     // On most devices, the sensor orientation is 90 degrees, but for some
     // devices it is 270 degrees. For devices with a sensor orientation of

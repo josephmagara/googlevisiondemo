@@ -11,6 +11,7 @@ import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata.LENS_FACING_FRONT
+import android.media.Image
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -20,15 +21,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
-import com.example.googlevision.presentation.GoogleVisionCameraPreviewInterface
+import com.example.googlevision.presentation.ImageRetrievalPipeline
 import com.example.googlevision.presentation.camera.GoogleVisionCameraPreview
+import com.example.googlevision.presentation.motiondectection.MotionDetector
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
-import com.example.googlevision.util.extensions.containsPermission
-import com.example.googlevision.util.extensions.createFile
-import com.example.googlevision.util.extensions.getRotationCompensation
-import com.example.googlevision.util.extensions.hasAllNeededPermissions
-import com.example.googlevision.util.extensions.requestPermissions
-import com.example.googlevision.util.extensions.setScaledPic
+import com.example.googlevision.util.extensions.*
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import timber.log.Timber
@@ -37,7 +34,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 
-class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterface {
+class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     @Inject
     lateinit var homeViewModelFactory: HomeViewModelFactory
@@ -45,13 +42,17 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
 
     private var filepath: String? = null
     private var googleVisionCameraPreview: GoogleVisionCameraPreview? = null
+    private var motionDetector: MotionDetector? = null
+
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
 
+        motionDetector = MotionDetector(this)
+
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
-                .get(HomeViewModel::class.java)
+            .get(HomeViewModel::class.java)
 
         homeViewModel.addImageAction().observe(this, Observer {
             takePhoto()
@@ -68,8 +69,12 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
         })
 
         homeViewModel.processedText().observe(this, Observer { text ->
-            Timber.v("Incoming text: $text")
+            Timber.d("Incoming text: $text")
             extracted_text.text = text
+        })
+
+        homeViewModel.imageProcessingCompleted().observe(this, Observer {
+            googleVisionCameraPreview?.finishedProcessingLastImage()
         })
 
         add_button.setOnClickListener {
@@ -91,12 +96,14 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
         super.onResume()
         Timber.v("Starting preview")
         googleVisionCameraPreview?.startPreview()
+        motionDetector?.registerListener()
     }
 
     override fun onPause() {
         super.onPause()
         Timber.v("Stopping preview")
         googleVisionCameraPreview?.stopPreview()
+        motionDetector?.unRegisterListener()
     }
     // endregion
 
@@ -135,16 +142,14 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
         }
     }
 
-    override fun onCameraSteadied() = homeViewModel.stopImageCaptureTimer()
-
-
-    override fun onCameraMoved() = homeViewModel.startImageCaptureTimer()
+    override fun onImageReceived(image: Image, cameraId: String) =
+        homeViewModel.queueImageForProcessing(image, getRotationCompensation(cameraId))
 
     // endregion
 
     // region Private functions
     private fun setupCamera() {
-        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this)
+        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this, motionDetector, this)
     }
 
     private fun takePhoto() {
@@ -162,9 +167,9 @@ class HomeActivity : DaggerAppCompatActivity(), GoogleVisionCameraPreviewInterfa
                 photoFile?.also {
                     filepath = it.absolutePath
                     val photoURI: Uri = FileProvider.getUriForFile(
-                            this,
-                            "${BuildConfig.APPLICATION_ID}.provider",
-                            it
+                        this,
+                        "${BuildConfig.APPLICATION_ID}.provider",
+                        it
                     )
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
                     takePictureIntent.putExtra("filepath", it.absolutePath)

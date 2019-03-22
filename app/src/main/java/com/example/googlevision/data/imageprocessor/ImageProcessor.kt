@@ -1,12 +1,14 @@
 package com.example.googlevision.data.imageprocessor
 
 import android.graphics.Bitmap
+import android.media.Image
 import com.example.googlevision.data.FireBaseProcessor
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
 import com.example.googlevision.util.extensions.withDefaultValueIfNeeded
 import com.google.firebase.ml.vision.FirebaseVision
-import com.google.firebase.ml.vision.text.FirebaseVisionText
+import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel
+import com.google.firebase.ml.vision.label.FirebaseVisionOnDeviceImageLabelerOptions
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
 import timber.log.Timber
@@ -18,12 +20,12 @@ import javax.inject.Singleton
  * Created by josephmagara on 20/2/19.
  */
 @Singleton
-class ImageProcessor @Inject constructor(): FireBaseProcessor(), ImageProcessActioner, ImageProcessorObserver {
+class ImageProcessor @Inject constructor() : FireBaseProcessor(), ImageProcessActioner, ImageProcessorObserver {
 
-    private val resultProcessor = PublishProcessor.create<FirebaseVisionText>()
+    private val resultProcessor = PublishProcessor.create<List<FirebaseVisionImageLabel>>()
 
     override fun extractTextFromImage(bitmap: Bitmap, rotation: Int) {
-        val firebaseVisionImage = getFireBaseVisionImage(bitmap, rotation)
+        val firebaseVisionImage = getFireBaseVisionFromBitmap(bitmap)
 
         val detector = FirebaseVision.getInstance()
             .onDeviceTextRecognizer
@@ -31,15 +33,35 @@ class ImageProcessor @Inject constructor(): FireBaseProcessor(), ImageProcessAct
         detector.processImage(firebaseVisionImage)
             .addOnSuccessListener { firebaseVisionText ->
                 Timber.d(firebaseVisionImage.toString().withDefaultValueIfNeeded())
-                resultProcessor.onNext(firebaseVisionText)
+                //resultProcessor.onNext(firebaseVisionText)
             }
             .addOnFailureListener {
                 resultProcessor.onError(it)
             }
     }
 
-    override fun imageProcessResultObserver(): Observable<FirebaseVisionText> = resultProcessor.toObservable()
+    override fun processImage(image: Image, rotation: Int) {
+        val firebaseVisionImage = getFireBaseVisionFromImage(image, rotation)
 
+        val options = FirebaseVisionOnDeviceImageLabelerOptions.Builder()
+            .setConfidenceThreshold(0.5f)
+            .build()
 
+        val labeler = FirebaseVision.getInstance()
+            .getOnDeviceImageLabeler(options)
+
+        labeler.processImage(firebaseVisionImage)
+            .addOnSuccessListener { labels ->
+                Timber.d(firebaseVisionImage.toString().withDefaultValueIfNeeded())
+                resultProcessor.onNext(labels)
+                image.close()
+            }
+            .addOnFailureListener {
+                resultProcessor.onError(it)
+            }
+    }
+
+    override fun imageProcessResultObserver(): Observable<List<FirebaseVisionImageLabel>> =
+        resultProcessor.toObservable()
 
 }
