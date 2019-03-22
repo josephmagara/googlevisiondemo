@@ -7,25 +7,22 @@ private val xMotionList: MutableList<Boolean> = mutableListOf()
 private val yMotionList: MutableList<Boolean> = mutableListOf()
 private val zMotionList: MutableList<Boolean> = mutableListOf()
 
-fun MotionCaptureStore.containsGradualMotionEvent(clearResults: Boolean = true): Boolean =
+fun MotionCaptureStore.containsGradualMotionEvent(): Boolean =
         if (motionPointList.size < 10) {
             false
         } else {
             val results = checkForGradualMotion(motionPointList)
-            if (clearResults) {
+            val containsGradualMotion = results.any{it}
+
+            if(!containsGradualMotion){
                 clearLists()
             }
-            results.any { it }
+            containsGradualMotion
         }
 
 
 fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
-    val containsNoGradualMotion = !containsGradualMotionEvent(clearResults = false)
-    if (containsNoGradualMotion) {
-        clearLists()
-        return true
-    } else {
-
+    if (containsGradualMotionEvent()) {
         val results = compareMovementsAcrossAxises(xMotionList, yMotionList, zMotionList)
 
         val xList = mutableListOf<Float>()
@@ -61,7 +58,13 @@ fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
             lastFiveMovesContainStopEvent(zList)
         }
 
-        return xMovementHasStopped && yMovementHasStopped && zMovementHasStopped
+        val gradualMotionStopped = xMovementHasStopped && yMovementHasStopped && zMovementHasStopped
+        if (gradualMotionStopped) clearLists()
+
+        return gradualMotionStopped
+    } else {
+        clearLists()
+        return true
     }
 }
 
@@ -70,16 +73,15 @@ private fun lastFiveMovesContainStopEvent(list: List<Float>): Boolean {
 
     val motionStopList = mutableListOf<Boolean>()
     list.takeLast(5).forEach {
-        motionStopList.add(lastMovement in it.minus(0.25f)..it.minus(0.25f))
+        motionStopList.add(lastMovement in it..it.plus(0.075f))
     }
 
     return motionStopList.count { it } > motionStopList.count { !it }
 }
 
 private fun checkForGradualMotion(motionPointList: List<MotionPoint>): List<Boolean> {
-    clearLists()
     motionPointList.forEachIndexed { index, motionPoint ->
-        val nextMotionPoint = motionPointList.getOrNull(index)
+        val nextMotionPoint = motionPointList.getOrNull(index.plus(1))
         nextMotionPoint?.let {
             with(motionPoint.absolueValue()) {
                 val nextPointAbsoluteValue = nextMotionPoint.absolueValue()

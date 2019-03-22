@@ -8,6 +8,7 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import io.reactivex.Completable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -20,7 +21,7 @@ class MotionDetector(activity: Activity) : SensorEventListener {
 
     private val sensorManager: SensorManager = activity.getSystemService(SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER)
-    private val motionCaptor = MotionCaptor()
+    private val motionCaptor = MotionCaptor(activity)
 
     private var delayTimerDisposable = Disposables.disposed()
     private var significantMotionObserver = Disposables.disposed()
@@ -67,10 +68,10 @@ class MotionDetector(activity: Activity) : SensorEventListener {
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
         significantMotionObserver = motionCaptor.significantPauseOccurred()
             .distinctUntilChanged()
-            .observeOn(Schedulers.computation())
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.computation())
-            .subscribe { significantMotionOccurred ->
-                deviceIsStill = significantMotionOccurred
+            .subscribe { significantPauseOccurred ->
+                deviceIsStill = significantPauseOccurred
             }
     }
 

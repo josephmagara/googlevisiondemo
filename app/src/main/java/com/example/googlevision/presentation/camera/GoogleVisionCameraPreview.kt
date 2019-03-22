@@ -100,31 +100,31 @@ class GoogleVisionCameraPreview(
         val cameraStateCallback = object : CameraDevice.StateCallback() {
 
             override fun onOpened(camera: CameraDevice) {
-                Toast.makeText(activity, "onOpened", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(activity, "onOpened", Toast.LENGTH_SHORT).show()
                 cameraDevice = camera
 
                 messageHandler.sendEmptyMessage(CAMERA_OPENED)
             }
 
             override fun onDisconnected(camera: CameraDevice) {
-                Toast.makeText(activity, "onDisconnected", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(activity, "onDisconnected", Toast.LENGTH_SHORT).show()
             }
 
             override fun onError(camera: CameraDevice, error: Int) {
-                Toast.makeText(activity, "onError", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(activity, "onError", Toast.LENGTH_SHORT).show()
             }
         }
 
         val cameraAvailableCallback = object : CameraManager.AvailabilityCallback() {
             override fun onCameraAvailable(cameraId: String) {
                 super.onCameraAvailable(cameraId)
-                Toast.makeText(activity, "onCameraAvailable", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(activity, "onCameraAvailable", Toast.LENGTH_SHORT).show()
             }
 
             override fun onCameraUnavailable(cameraId: String) {
                 super.onCameraUnavailable(cameraId)
 
-                Toast.makeText(activity, "onCameraUnavailable", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(activity, "onCameraUnavailable", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -147,7 +147,7 @@ class GoogleVisionCameraPreview(
             processingForLastPhotoCompleted = false
             val image = it.acquireLatestImage()
             if (image != null) {
-                Toast.makeText(activity, "Photo taken", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(activity, "Photo taken", Toast.LENGTH_SHORT).show()
                 imageRetrievalPipeline.onImageReceived(image, currentCameraId)
 
                 motionDetector?.invalidateDeviceIsStillFlag()
