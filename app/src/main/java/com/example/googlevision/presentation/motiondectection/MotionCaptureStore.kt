@@ -2,7 +2,7 @@ package com.example.googlevision.presentation.motiondectection
 
 class MotionCaptureStore {
 
-    private var motionPointList: MutableList<MotionPoint> = mutableListOf()
+    internal var motionPointList: MutableList<MotionPoint> = mutableListOf()
 
     fun addMotionPointToStore(newMotionPoint: MotionPoint) = motionPointList.add(newMotionPoint)
 
