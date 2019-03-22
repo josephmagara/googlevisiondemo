@@ -20,26 +20,47 @@ fun MotionCaptureStore.containsGradualMotionEvent(clearResults: Boolean = true):
 
 
 fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
-    if (!containsGradualMotionEvent(clearResults = false)) {
+    val containsNoGradualMotion = !containsGradualMotionEvent(clearResults = false)
+    if (containsNoGradualMotion) {
+        clearLists()
         return true
     } else {
+
+        val results = compareMovementsAcrossAxises(xMotionList, yMotionList, zMotionList)
+
+        val xList = mutableListOf<Float>()
+        val yList = mutableListOf<Float>()
+        val zList = mutableListOf<Float>()
+
+        motionPointList.forEach { motionPoint ->
+            with(motionPoint){
+                if(results[0])
+                    xList.add(xPosition)
+                if(results[1])
+                    yList.add(yPosition)
+                if(results[2])
+                    zList.add(zPosition)
+            }
+        }
+
         return true
     }
 }
 
 private fun checkForGradualMotion(motionPointList: List<MotionPoint>): List<Boolean> {
-
+    clearLists()
     motionPointList.forEachIndexed { index, motionPoint ->
         val nextMotionPoint = motionPointList.getOrNull(index)
         nextMotionPoint?.let {
             with(motionPoint.absolueValue()) {
                 val nextPointAbsoluteValue = nextMotionPoint.absolueValue()
-                com.example.googlevision.util.extensions.xMotionList.add(nextPointAbsoluteValue.xPosition > this.xPosition)
-                com.example.googlevision.util.extensions.yMotionList.add(nextPointAbsoluteValue.yPosition > this.yPosition)
-                com.example.googlevision.util.extensions.zMotionList.add(nextPointAbsoluteValue.zPosition > this.zPosition)
+                xMotionList.add(nextPointAbsoluteValue.xPosition > this.xPosition)
+                yMotionList.add(nextPointAbsoluteValue.yPosition > this.yPosition)
+                zMotionList.add(nextPointAbsoluteValue.zPosition > this.zPosition)
             }
         }
     }
+
     return compareMovementsAcrossAxises(xMotionList, yMotionList, zMotionList)
 }
 
