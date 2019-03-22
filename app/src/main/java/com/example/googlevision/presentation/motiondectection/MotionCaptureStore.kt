@@ -10,7 +10,4 @@ class MotionCaptureStore {
         if (motionPointList.any()) motionPointList.clear() else return
     }
 
-    fun flagGradualEvent() =
-        addMotionPointToStore(MotionPoint(0f, 0f, 0f))
-
 }

@@ -12,9 +12,9 @@ fun MotionCaptureStore.containsGradualMotionEvent(): Boolean =
             false
         } else {
             val results = checkForGradualMotion(motionPointList)
-            val containsGradualMotion = results.any{it}
+            val containsGradualMotion = results.any { it }
 
-            if(!containsGradualMotion){
+            if (!containsGradualMotion) {
                 clearLists()
             }
             containsGradualMotion
@@ -43,19 +43,19 @@ fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
         val xMovementHasStopped = if (!xList.any()) {
             true
         } else {
-            lastFiveMovesContainStopEvent(xList)
+            lastTenMovesContainStopEvent(xList)
         }
 
         val yMovementHasStopped = if (!yList.any()) {
             true
         } else {
-            lastFiveMovesContainStopEvent(yList)
+            lastTenMovesContainStopEvent(yList)
         }
 
         val zMovementHasStopped = if (!zList.any()) {
             true
         } else {
-            lastFiveMovesContainStopEvent(zList)
+            lastTenMovesContainStopEvent(zList)
         }
 
         val gradualMotionStopped = xMovementHasStopped && yMovementHasStopped && zMovementHasStopped
@@ -68,12 +68,12 @@ fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
     }
 }
 
-private fun lastFiveMovesContainStopEvent(list: List<Float>): Boolean {
+private fun lastTenMovesContainStopEvent(list: List<Float>): Boolean {
     val lastMovement = list.last()
 
     val motionStopList = mutableListOf<Boolean>()
-    list.takeLast(5).forEach {
-        motionStopList.add(lastMovement in it..it.plus(0.075f))
+    list.takeLast(10).forEach {
+        motionStopList.add(lastMovement in it..it.plus(0.065f))
     }
 
     return motionStopList.count { it } > motionStopList.count { !it }
@@ -83,23 +83,19 @@ private fun checkForGradualMotion(motionPointList: List<MotionPoint>): List<Bool
     motionPointList.forEachIndexed { index, motionPoint ->
         val nextMotionPoint = motionPointList.getOrNull(index.plus(1))
         nextMotionPoint?.let {
-            with(motionPoint.absolueValue()) {
-                val nextPointAbsoluteValue = nextMotionPoint.absolueValue()
-                xMotionList.add(nextPointAbsoluteValue.xPosition > this.xPosition)
-                yMotionList.add(nextPointAbsoluteValue.yPosition > this.yPosition)
-                zMotionList.add(nextPointAbsoluteValue.zPosition > this.zPosition)
-            }
+            xMotionList.add(nextMotionPoint.xPosition.isGreaterThanSignedComparison(motionPoint.xPosition))
+            yMotionList.add(nextMotionPoint.yPosition.isGreaterThanSignedComparison(motionPoint.yPosition))
+            zMotionList.add(nextMotionPoint.zPosition.isGreaterThanSignedComparison(motionPoint.zPosition))
         }
     }
 
     return compareMovementsAcrossAxises(xMotionList, yMotionList, zMotionList)
 }
 
-private fun compareMovementsAcrossAxises(
-        xList: List<Boolean>,
-        yList: List<Boolean>,
-        zList: List<Boolean>
-): List<Boolean> {
+private fun compareMovementsAcrossAxises(xList: List<Boolean>,
+                                         yList: List<Boolean>,
+                                         zList: List<Boolean>): List<Boolean> {
+
     val graduallyMovingAlongX = xList.count { it } > xList.count { !it }
     val graduallyMovingAlongY = yList.count { it } > yList.count { !it }
     val graduallyMovingAlongZ = zList.count { it } > zList.count { !it }

@@ -24,9 +24,9 @@ class MotionCaptor(private val activity: Activity) {
     private fun computeNewMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
         var message = "we "
 
-        if (newXPosition in previousXPosition.minus(0.5f)..previousXPosition.plus(0.5f) &&
-                newYPosition in previousYPosition.minus(0.5f)..previousYPosition.plus(0.5f) &&
-                newZPosition in previousZPosition.minus(0.5f)..previousZPosition.plus(0.5f)
+        if (newXPosition in previousXPosition.minus(0.3f)..previousXPosition.plus(0.3f) &&
+                newYPosition in previousYPosition.minus(0.3f)..previousYPosition.plus(0.3f) &&
+                newZPosition in previousZPosition.minus(0.3f)..previousZPosition.plus(0.3f)
         ) {
             updateMotionCaptureStore(newXPosition, newYPosition, newZPosition)
 
@@ -62,8 +62,6 @@ class MotionCaptor(private val activity: Activity) {
 
     private fun updateMotionCaptureStore(newXPosition: Float, newYPosition: Float, newZPosition: Float) =
             motionCaptureStore.addMotionPointToStore(MotionPoint(newXPosition, newYPosition, newZPosition))
-
-    private fun notifyStoreOfGradualMovementEvent() = motionCaptureStore.flagGradualEvent()
 
     private fun setNewCoordinates(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
         previousXPosition = newXPosition
