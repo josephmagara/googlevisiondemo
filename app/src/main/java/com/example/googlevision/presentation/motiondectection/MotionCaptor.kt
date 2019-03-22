@@ -27,7 +27,7 @@ class MotionCaptor(private val activity: Activity) {
                 newYPosition in previousYPosition.minus(0.3f)..previousYPosition.plus(0.3f) &&
                 newZPosition in previousZPosition.minus(0.3f)..previousZPosition.plus(0.3f)
         ) {
-            updateMotionCaptureStore(newXPosition, newYPosition, newZPosition)
+            /*updateMotionCaptureStore(newXPosition, newYPosition, newZPosition)
 
             val gradualMotionOccurring = isGraduallyMoving()
             val finishedGraduallyMoving = gradualMotionOccurring && hasStoppedGraduallyMoving()
@@ -45,7 +45,9 @@ class MotionCaptor(private val activity: Activity) {
                     message += "are still enough for photo"
                     significantPauseOccurredPublisher.onNext(true)
                 }
-            }
+
+            }*/
+            significantPauseOccurredPublisher.onNext(true)
         } else {
             message += "are moving fast"
             significantPauseOccurredPublisher.onNext(false)
