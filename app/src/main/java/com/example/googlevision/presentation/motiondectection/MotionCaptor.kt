@@ -1,7 +1,5 @@
 package com.example.googlevision.presentation.motiondectection
 
-import android.app.Activity
-import android.widget.Toast
 import com.example.googlevision.util.MotionUtil
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
@@ -11,7 +9,7 @@ import javax.inject.Singleton
  * Created by josephmagara on 21/3/19.
  */
 @Singleton
-class MotionCaptor(private val activity: Activity) {
+class MotionCaptor {
 
     private var previousXPosition: Float = 0f
     private var previousYPosition: Float = 0f
@@ -21,7 +19,6 @@ class MotionCaptor(private val activity: Activity) {
     private val motionCaptureStore = MotionCaptureStore()
 
     private fun computeNewMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
-        var message = "we "
 
         if (newXPosition in previousXPosition.minus(0.3f)..previousXPosition.plus(0.3f) &&
                 newYPosition in previousYPosition.minus(0.3f)..previousYPosition.plus(0.3f) &&
@@ -34,26 +31,20 @@ class MotionCaptor(private val activity: Activity) {
 
             when {
                 finishedGraduallyMoving -> {
-                    message += "have stopped"
                     significantPauseOccurredPublisher.onNext(true)
                 }
                 gradualMotionOccurring -> {
-                    message += "are gradually moving"
                     significantPauseOccurredPublisher.onNext(false)
                 }
                 else -> {
-                    message += "are still enough for photo"
                     significantPauseOccurredPublisher.onNext(true)
                 }
 
             }*/
             significantPauseOccurredPublisher.onNext(true)
         } else {
-            message += "are moving fast"
             significantPauseOccurredPublisher.onNext(false)
         }
-
-        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
         setNewCoordinates(newXPosition, newYPosition, newZPosition)
     }
 

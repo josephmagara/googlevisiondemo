@@ -21,7 +21,7 @@ class MotionDetector(activity: Activity) : SensorEventListener {
 
     private val sensorManager: SensorManager = activity.getSystemService(SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER)
-    private val motionCaptor = MotionCaptor(activity)
+    private val motionCaptor = MotionCaptor()
 
     private var delayTimerDisposable = Disposables.disposed()
     private var significantMotionObserver = Disposables.disposed()
