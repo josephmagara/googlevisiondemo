@@ -2,8 +2,7 @@ package com.example.googlevision.presentation.motiondectection
 
 import android.app.Activity
 import android.widget.Toast
-import com.example.googlevision.util.extensions.containsGradualMotionEvent
-import com.example.googlevision.util.extensions.containsStopAfterGradualMotionEvent
+import com.example.googlevision.util.MotionUtil
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
 import javax.inject.Singleton
@@ -56,9 +55,11 @@ class MotionCaptor(private val activity: Activity) {
         setNewCoordinates(newXPosition, newYPosition, newZPosition)
     }
 
-    private fun isGraduallyMoving(): Boolean = motionCaptureStore.containsGradualMotionEvent()
+    private fun isGraduallyMoving(): Boolean =
+            MotionUtil.containsGradualMotionEvent(motionCaptureStore.motionPointList)
 
-    private fun hasStoppedGraduallyMoving(): Boolean = motionCaptureStore.containsStopAfterGradualMotionEvent()
+    private fun hasStoppedGraduallyMoving(): Boolean =
+            MotionUtil.containsStopAfterGradualMotionEvent(motionCaptureStore.motionPointList)
 
     private fun updateMotionCaptureStore(newXPosition: Float, newYPosition: Float, newZPosition: Float) =
             motionCaptureStore.addMotionPointToStore(MotionPoint(newXPosition, newYPosition, newZPosition))
