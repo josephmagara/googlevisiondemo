@@ -7,14 +7,17 @@ private val xMotionList: MutableList<Boolean> = mutableListOf()
 private val yMotionList: MutableList<Boolean> = mutableListOf()
 private val zMotionList: MutableList<Boolean> = mutableListOf()
 
-fun MotionCaptureStore.containsGradualMotionEvent(clearResults: Boolean = true): Boolean {
+fun MotionCaptureStore.containsGradualMotionEvent(clearResults: Boolean = true): Boolean =
     if (motionPointList.size < 10) {
-        return false
+        false
     } else {
-        val results = checkForGradualMotion(motionPointList, clearResults)
-        return results.any { it }
+        val results = checkForGradualMotion(motionPointList)
+        if (clearResults) {
+            clearLists()
+        }
+        results.any { it }
     }
-}
+
 
 fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
     if (!containsGradualMotionEvent(clearResults = false)) {
@@ -24,7 +27,7 @@ fun MotionCaptureStore.containsStopAfterGradualMotionEvent(): Boolean {
     }
 }
 
-private fun checkForGradualMotion(motionPointList: List<MotionPoint>, clearResults: Boolean = true): List<Boolean> {
+private fun checkForGradualMotion(motionPointList: List<MotionPoint>): List<Boolean> {
 
     motionPointList.forEachIndexed { index, motionPoint ->
         val nextMotionPoint = motionPointList.getOrNull(index)
@@ -37,17 +40,23 @@ private fun checkForGradualMotion(motionPointList: List<MotionPoint>, clearResul
             }
         }
     }
+    return compareMovementsAcrossAxises(xMotionList, yMotionList, zMotionList)
+}
 
-    val graduallyMovingAlongX = xMotionList.count { it } > xMotionList.count { !it }
-    val graduallyMovingAlongY = yMotionList.count { it } > yMotionList.count { !it }
-    val graduallyMovingAlongZ = zMotionList.count { it } > zMotionList.count { !it }
-
-    if (clearResults) {
-        xMotionList.clear()
-        yMotionList.clear()
-        zMotionList.clear()
-    }
+private fun compareMovementsAcrossAxises(
+    xList: List<Boolean>,
+    yList: List<Boolean>,
+    zList: List<Boolean>
+): List<Boolean> {
+    val graduallyMovingAlongX = xList.count { it } > xList.count { !it }
+    val graduallyMovingAlongY = yList.count { it } > yList.count { !it }
+    val graduallyMovingAlongZ = zList.count { it } > zList.count { !it }
 
     return listOf(graduallyMovingAlongX, graduallyMovingAlongY, graduallyMovingAlongZ)
+}
 
+private fun clearLists() {
+    xMotionList.clear()
+    yMotionList.clear()
+    zMotionList.clear()
 }
