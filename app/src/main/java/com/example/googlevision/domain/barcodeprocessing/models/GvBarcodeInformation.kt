@@ -1,4 +1,4 @@
-package com.example.googlevision.domain.models
+package com.example.googlevision.domain.barcodeprocessing.models
 
 import kotlin.reflect.KClass
 

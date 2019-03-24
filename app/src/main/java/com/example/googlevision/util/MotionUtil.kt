@@ -1,6 +1,6 @@
 package com.example.googlevision.util
 
-import com.example.googlevision.presentation.motiondectection.MotionPoint
+import com.example.googlevision.domain.motiondetection.models.MotionPoint
 import com.example.googlevision.util.extensions.isGreaterThanSignedComparison
 
 

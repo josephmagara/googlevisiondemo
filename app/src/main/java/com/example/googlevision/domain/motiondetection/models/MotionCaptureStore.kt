@@ -1,4 +1,4 @@
-package com.example.googlevision.presentation.motiondectection
+package com.example.googlevision.domain.motiondetection.models
 
 class MotionCaptureStore {
 

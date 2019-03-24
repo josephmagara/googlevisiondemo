@@ -7,6 +7,7 @@ import android.hardware.Sensor.TYPE_ACCELEROMETER
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import com.example.googlevision.domain.motiondetection.MotionDetectionUseCase
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposables
@@ -21,7 +22,7 @@ class MotionDetector(activity: Activity) : SensorEventListener {
 
     private val sensorManager: SensorManager = activity.getSystemService(SENSOR_SERVICE) as SensorManager
     private val accelerometer: Sensor = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER)
-    private val motionCaptor = MotionCaptor()
+    private val motionDetectionUseCase = MotionDetectionUseCase()
 
     private var delayTimerDisposable = Disposables.disposed()
     private var significantMotionObserver = Disposables.disposed()
@@ -57,7 +58,7 @@ class MotionDetector(activity: Activity) : SensorEventListener {
                 val y = gravity[1]
                 val z = gravity[2]
 
-                motionCaptor.captureMotion(x, y, z)
+                motionDetectionUseCase.captureMotion(x, y, z)
             }
         }
     }
@@ -66,7 +67,7 @@ class MotionDetector(activity: Activity) : SensorEventListener {
 
     fun registerListener() {
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
-        significantMotionObserver = motionCaptor.significantPauseOccurred()
+        significantMotionObserver = motionDetectionUseCase.significantPauseOccurred()
             .distinctUntilChanged()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeOn(Schedulers.computation())

@@ -1,15 +1,15 @@
-package com.example.googlevision.presentation.motiondectection
+package com.example.googlevision.domain.motiondetection
 
+import com.example.googlevision.domain.motiondetection.models.MotionCaptureStore
+import com.example.googlevision.domain.motiondetection.models.MotionPoint
 import com.example.googlevision.util.MotionUtil
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
-import javax.inject.Singleton
 
 /**
- * Created by josephmagara on 21/3/19.
+ * Created by josephmagara on 25/3/19.
  */
-@Singleton
-class MotionCaptor {
+class MotionDetectionUseCase {
 
     private var previousXPosition: Float = 0f
     private var previousYPosition: Float = 0f
@@ -21,8 +21,8 @@ class MotionCaptor {
     private fun computeNewMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
 
         if (newXPosition in previousXPosition.minus(0.3f)..previousXPosition.plus(0.3f) &&
-                newYPosition in previousYPosition.minus(0.3f)..previousYPosition.plus(0.3f) &&
-                newZPosition in previousZPosition.minus(0.3f)..previousZPosition.plus(0.3f)
+            newYPosition in previousYPosition.minus(0.3f)..previousYPosition.plus(0.3f) &&
+            newZPosition in previousZPosition.minus(0.3f)..previousZPosition.plus(0.3f)
         ) {
             /*updateMotionCaptureStore(newXPosition, newYPosition, newZPosition)
 
@@ -49,13 +49,19 @@ class MotionCaptor {
     }
 
     private fun isGraduallyMoving(): Boolean =
-            MotionUtil.containsGradualMotionEvent(motionCaptureStore.motionPointList)
+        MotionUtil.containsGradualMotionEvent(motionCaptureStore.motionPointList)
 
     private fun hasStoppedGraduallyMoving(): Boolean =
-            MotionUtil.containsStopAfterGradualMotionEvent(motionCaptureStore.motionPointList)
+        MotionUtil.containsStopAfterGradualMotionEvent(motionCaptureStore.motionPointList)
 
     private fun updateMotionCaptureStore(newXPosition: Float, newYPosition: Float, newZPosition: Float) =
-            motionCaptureStore.addMotionPointToStore(MotionPoint(newXPosition, newYPosition, newZPosition))
+        motionCaptureStore.addMotionPointToStore(
+            MotionPoint(
+                newXPosition,
+                newYPosition,
+                newZPosition
+            )
+        )
 
     private fun setNewCoordinates(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
         previousXPosition = newXPosition
@@ -64,7 +70,7 @@ class MotionCaptor {
     }
 
     private fun hasNotBeenInitialized(): Boolean =
-            arrayOf(previousXPosition, previousYPosition, previousZPosition).all { it == 0f }
+        arrayOf(previousXPosition, previousYPosition, previousZPosition).all { it == 0f }
 
     fun significantPauseOccurred(): Observable<Boolean> = significantPauseOccurredPublisher.toObservable()
 
