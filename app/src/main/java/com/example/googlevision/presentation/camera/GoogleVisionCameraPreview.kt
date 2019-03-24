@@ -12,9 +12,8 @@ import android.os.Message
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import android.widget.Toast
 import com.example.googlevision.presentation.ImageRetrievalPipeline
-import com.example.googlevision.presentation.motiondectection.MotionDetector
+import com.example.googlevision.data.motiondectection.MotionDetector
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10

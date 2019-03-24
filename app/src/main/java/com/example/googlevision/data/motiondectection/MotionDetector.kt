@@ -1,4 +1,4 @@
-package com.example.googlevision.presentation.motiondectection
+package com.example.googlevision.data.motiondectection
 
 import android.app.Activity
 import android.content.Context.SENSOR_SERVICE
