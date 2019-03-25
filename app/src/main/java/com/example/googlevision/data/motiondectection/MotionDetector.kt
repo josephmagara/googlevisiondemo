@@ -1,9 +1,6 @@
 package com.example.googlevision.data.motiondectection
 
-import android.app.Activity
-import android.content.Context.SENSOR_SERVICE
 import android.hardware.Sensor
-import android.hardware.Sensor.TYPE_ACCELEROMETER
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
@@ -14,14 +11,16 @@ import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 /**
  * Created by josephmagara on 20/3/19.
  */
-class MotionDetector(activity: Activity) : SensorEventListener {
+class MotionDetector @Inject constructor(
+        private val sensorManager: SensorManager,
+        private val accelerometer: Sensor
+) : SensorEventListener {
 
-    private val sensorManager: SensorManager = activity.getSystemService(SENSOR_SERVICE) as SensorManager
-    private val accelerometer: Sensor = sensorManager.getDefaultSensor(TYPE_ACCELEROMETER)
     private val motionDetectionUseCase = MotionDetectionUseCase()
 
     private var delayTimerDisposable = Disposables.disposed()
@@ -33,13 +32,12 @@ class MotionDetector(activity: Activity) : SensorEventListener {
             if (value) {
                 if (delayTimerDisposable.isDisposed) {
                     delayTimerDisposable = Completable.timer(250L, TimeUnit.MILLISECONDS)
-                        .observeOn(Schedulers.computation())
-                        .subscribeOn(Schedulers.computation())
-                        .subscribe {
-                            field = value
-                        }
+                            .observeOn(Schedulers.computation())
+                            .subscribeOn(Schedulers.computation())
+                            .subscribe {
+                                field = value
+                            }
                 }
-
             } else {
                 delayTimerDisposable.dispose()
                 field = value
@@ -63,17 +61,19 @@ class MotionDetector(activity: Activity) : SensorEventListener {
         }
     }
 
-    fun invalidateDeviceIsStillFlag() { deviceIsStill = false }
+    fun invalidateDeviceIsStillFlag() {
+        deviceIsStill = false
+    }
 
     fun registerListener() {
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
         significantMotionObserver = motionDetectionUseCase.significantPauseOccurred()
-            .distinctUntilChanged()
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribeOn(Schedulers.computation())
-            .subscribe { significantPauseOccurred ->
-                deviceIsStill = significantPauseOccurred
-            }
+                .distinctUntilChanged()
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.computation())
+                .subscribe { significantPauseOccurred ->
+                    deviceIsStill = significantPauseOccurred
+                }
     }
 
     fun unRegisterListener() {

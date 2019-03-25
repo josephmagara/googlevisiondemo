@@ -21,11 +21,16 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.googlevision.BuildConfig
 import com.example.googlevision.R
+import com.example.googlevision.data.motiondectection.MotionDetector
 import com.example.googlevision.presentation.ImageRetrievalPipeline
 import com.example.googlevision.presentation.camera.GoogleVisionCameraPreview
-import com.example.googlevision.data.motiondectection.MotionDetector
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
-import com.example.googlevision.util.extensions.*
+import com.example.googlevision.util.extensions.containsPermission
+import com.example.googlevision.util.extensions.createFile
+import com.example.googlevision.util.extensions.getRotationCompensation
+import com.example.googlevision.util.extensions.hasAllNeededPermissions
+import com.example.googlevision.util.extensions.requestPermissions
+import com.example.googlevision.util.extensions.setScaledPic
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import timber.log.Timber
@@ -42,14 +47,15 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     private var filepath: String? = null
     private var googleVisionCameraPreview: GoogleVisionCameraPreview? = null
-    private var motionDetector: MotionDetector? = null
+
+    @Inject
+    lateinit var motionDetector: MotionDetector
 
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
 
-        motionDetector = MotionDetector(this)
 
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
             .get(HomeViewModel::class.java)

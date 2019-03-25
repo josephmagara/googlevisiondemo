@@ -4,7 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context.CAMERA_SERVICE
 import android.graphics.ImageFormat
-import android.hardware.camera2.*
+import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCaptureSession
+import android.hardware.camera2.CameraDevice
+import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CaptureRequest
+import android.hardware.camera2.CaptureResult
+import android.hardware.camera2.TotalCaptureResult
 import android.media.ImageReader
 import android.opengl.GLSurfaceView
 import android.os.Handler
@@ -12,8 +18,8 @@ import android.os.Message
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import com.example.googlevision.presentation.ImageRetrievalPipeline
 import com.example.googlevision.data.motiondectection.MotionDetector
+import com.example.googlevision.presentation.ImageRetrievalPipeline
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -24,8 +30,8 @@ import javax.microedition.khronos.opengles.GL10
  */
 class GoogleVisionCameraPreview(
     cameraPreviewView: SurfaceView,
-    private val activity: Activity,
-    private val motionDetector: MotionDetector?,
+    activity: Activity,
+    private val motionDetector: MotionDetector,
     private val imageRetrievalPipeline: ImageRetrievalPipeline
 ) :
     SurfaceHolder.Callback, GLSurfaceView.Renderer, Handler.Callback {
@@ -48,7 +54,7 @@ class GoogleVisionCameraPreview(
 
     private val canTakePhoto: Boolean
         get() {
-            return motionDetector?.deviceIsStill == true && processingForLastPhotoCompleted
+            return motionDetector.deviceIsStill && processingForLastPhotoCompleted
         }
 
     init {
