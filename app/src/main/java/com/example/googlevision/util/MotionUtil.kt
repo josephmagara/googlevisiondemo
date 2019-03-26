@@ -15,17 +15,17 @@ class MotionUtil {
         private val zMotionList: MutableList<Boolean> = mutableListOf()
 
         fun containsGradualMotionEvent(motionPointList: List<MotionPoint>): Boolean =
-                if (motionPointList.size < 10) {
-                    false
-                } else {
-                    val results = checkForGradualMotion(motionPointList)
-                    val containsGradualMotion = results.any { it }
+            if (motionPointList.size < 10) {
+                false
+            } else {
+                val results = checkForGradualMotion(motionPointList)
+                val containsGradualMotion = results.any { it }
 
-                    if (!containsGradualMotion) {
-                        clearLists()
-                    }
-                    containsGradualMotion
+                if (!containsGradualMotion) {
+                    clearLists()
                 }
+                containsGradualMotion
+            }
 
 
         fun containsStopAfterGradualMotionEvent(motionPointList: List<MotionPoint>): Boolean {
@@ -75,14 +75,19 @@ class MotionUtil {
             }
         }
 
-        fun getVelocity(list: List<Float>, startTime: Float, endTime: Float): Float {
+        fun computeVelocity(list: List<MotionPoint>, startTime: Float, endTime: Float): Float {
             val time = startTime - endTime
-            var distance = 0f
+            var xDistance = 0f
+            var yDistance = 0f
+            var zDistance = 0f
             list.forEach {
-                distance =+ it.absoluteValue
+                xDistance = +it.xPosition.absoluteValue
+                yDistance = +it.yPosition.absoluteValue
+                zDistance = +it.zPosition.absoluteValue
             }
 
-            return distance/time
+            val distance = maxOf(xDistance, yDistance, zDistance)
+            return distance / time
         }
 
         private fun lastTenMovesContainStopEvent(list: List<Float>): Boolean {
@@ -109,9 +114,11 @@ class MotionUtil {
             return compareMovementsAcrossAxises(xMotionList, yMotionList, zMotionList)
         }
 
-        private fun compareMovementsAcrossAxises(xList: List<Boolean>,
-                                                 yList: List<Boolean>,
-                                                 zList: List<Boolean>): List<Boolean> {
+        private fun compareMovementsAcrossAxises(
+            xList: List<Boolean>,
+            yList: List<Boolean>,
+            zList: List<Boolean>
+        ): List<Boolean> {
 
             val graduallyMovingAlongX = xList.count { it } > xList.count { !it }
             val graduallyMovingAlongY = yList.count { it } > yList.count { !it }

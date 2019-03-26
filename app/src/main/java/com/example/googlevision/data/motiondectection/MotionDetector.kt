@@ -77,6 +77,7 @@ class MotionDetector @Inject constructor(
     }
 
     fun registerListener() {
+        motionDetectionUseCase.setUp()
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI)
         significantMotionObserver = motionDetectionUseCase.significantPauseOccurred()
                 .distinctUntilChanged()
@@ -88,6 +89,7 @@ class MotionDetector @Inject constructor(
     }
 
     fun unRegisterListener() {
+        motionDetectionUseCase.onCleared()
         sensorManager.unregisterListener(this)
         significantMotionObserver.dispose()
     }

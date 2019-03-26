@@ -8,7 +8,7 @@ import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.disposables.Disposables
 import io.reactivex.processors.PublishProcessor
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -20,16 +20,22 @@ class MotionDetectionUseCase {
     private var previousXPosition: Float = 0f
     private var previousYPosition: Float = 0f
     private var previousZPosition: Float = 0f
+    private var isComputingMotion: Boolean = false
 
-    private val significantPauseOccurredPublisher: PublishProcessor<Boolean> = PublishProcessor.create()
     private val motionCaptureStore = MotionCaptureStore()
 
-    private val motionEventCountPublisher: PublishSubject<Int> = PublishSubject.create()
-    private val motionSnapshotCaptureTrigger: PublishSubject<Any> = PublishSubject.create()
+    private val motionEventCountPublisher: PublishProcessor<Int> = PublishProcessor.create()
+    private val motionSnapshotCaptureTrigger: PublishProcessor<Any> = PublishProcessor.create()
+    private val significantPauseOccurredPublisher: PublishProcessor<Boolean> = PublishProcessor.create()
 
-    private var motionSnapshotCaptureTimerObservable: Disposable = Disposables.disposed()
     private var motionEventCountObserver: Disposable = Disposables.disposed()
+    private var isComputingMotionObserver: Disposable = Disposables.disposed()
+    private var motionSnapshotTriggerObserver: Disposable = Disposables.disposed()
+    private var motionSnapshotCaptureTimerObservable: Disposable = Disposables.disposed()
 
+    init {
+        setUp()
+    }
 
     private fun computeNewMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
 
@@ -38,7 +44,7 @@ class MotionDetectionUseCase {
             newZPosition in previousZPosition.minus(0.3f)..previousZPosition.plus(0.3f)
         ) {
             updateMotionCaptureStore(newXPosition, newYPosition, newZPosition)
-
+            /*
             val gradualMotionOccurring = isGraduallyMoving()
             val finishedGraduallyMoving = gradualMotionOccurring && hasStoppedGraduallyMoving()
 
@@ -54,10 +60,8 @@ class MotionDetectionUseCase {
                 }
 
             }
-            significantPauseOccurredPublisher.onNext(true)
+            */
         } else {
-            Timber.d("We're moving")
-            significantPauseOccurredPublisher.onNext(false)
         }
         setNewCoordinates(newXPosition, newYPosition, newZPosition)
     }
@@ -97,12 +101,14 @@ class MotionDetectionUseCase {
     private fun startMotionSnapshotCaptureTimer() {
         motionSnapshotCaptureTimerObservable = Completable.timer(2000L, TimeUnit.MILLISECONDS)
             .subscribe {
+
+                // Lock the store so that no more motion events are added to it.
                 motionCaptureStore.lockStore()
                 triggerMotionSnapshotCapture()
             }
     }
 
-    private fun setUpMotionEventCountObserver(){
+    private fun setUpMotionEventCountObserver() {
         motionEventCountObserver = motionEventCountPublisher
             .skip(50)
             .subscribe {
@@ -119,16 +125,42 @@ class MotionDetectionUseCase {
     private fun hasNotBeenInitialized(): Boolean =
         arrayOf(previousXPosition, previousYPosition, previousZPosition).all { it == 0f }
 
+
+
+    fun setUp() {
+        motionSnapshotTriggerObserver = motionSnapshotCaptureTrigger.observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.computation())
+            .subscribe {
+                val velocity = MotionUtil.computeVelocity(
+                    motionCaptureStore.motionPointList.toList(),
+                    motionCaptureStore.startTime,
+                    motionCaptureStore.endTime
+                )
+
+                if (velocity > 200f){
+                    Timber.d("We're moving")
+                    significantPauseOccurredPublisher.onNext(false)
+                }else{
+                    Timber.d("We're moving")
+                    significantPauseOccurredPublisher.onNext(true)
+                }
+
+                //Unlock the store so that we can capture the motion data
+                motionCaptureStore.unlockStore()
+            }
+
+        isComputingMotionObserver = motionCaptureStore.storeLockObserver().subscribe { isComputingMotion = it }
+    }
+
     fun significantPauseOccurred(): Observable<Boolean> = significantPauseOccurredPublisher.toObservable()
 
     fun captureMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
 
+        if (isComputingMotion) return
+
         if (hasNotBeenInitialized()) {
             setNewCoordinates(newXPosition, newYPosition, newZPosition)
             significantPauseOccurredPublisher.onNext(false)
-
-            //Unlock the store so that we can capture the motion data
-            motionCaptureStore.unlockStore()
 
             //Start the timer and counter that will trigger the snapshot of the motion store (which ever fires first
             // will trigger the snapshot capture and then reset both itself and the other timer/counter)
@@ -137,5 +169,12 @@ class MotionDetectionUseCase {
         } else {
             computeNewMotion(newXPosition, newYPosition, newZPosition)
         }
+    }
+
+    fun onCleared(){
+        motionEventCountObserver.dispose()
+        isComputingMotionObserver.dispose()
+        motionSnapshotTriggerObserver.dispose()
+        motionSnapshotCaptureTimerObservable.dispose()
     }
 }
