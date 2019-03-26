@@ -2,6 +2,7 @@ package com.example.googlevision.util
 
 import com.example.googlevision.domain.motiondetection.models.MotionPoint
 import com.example.googlevision.util.extensions.isGreaterThanSignedComparison
+import kotlin.math.absoluteValue
 
 
 class MotionUtil {
@@ -72,6 +73,16 @@ class MotionUtil {
                 clearLists()
                 return true
             }
+        }
+
+        fun getVelocity(list: List<Float>, startTime: Float, endTime: Float): Float {
+            val time = startTime - endTime
+            var distance = 0f
+            list.forEach {
+                distance =+ it.absoluteValue
+            }
+
+            return distance/time
         }
 
         private fun lastTenMovesContainStopEvent(list: List<Float>): Boolean {

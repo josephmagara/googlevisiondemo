@@ -24,6 +24,8 @@ class MotionDetector @Inject constructor(
 
     private var delayTimerDisposable = Disposables.disposed()
     private var significantMotionObserver = Disposables.disposed()
+    private val gravity = arrayOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+    private var eventsCapturedCounter = 0
 
     var deviceIsStill: Boolean = false
         set(value) {
@@ -48,12 +50,22 @@ class MotionDetector @Inject constructor(
     override fun onSensorChanged(event: SensorEvent?) {
         event?.let { sensorEvent ->
             if (sensorEvent.sensor.type == Sensor.TYPE_ACCELEROMETER) {
-                val gravity = event.values.clone()
 
                 // Shake detection
-                val x = gravity[0]
-                val y = gravity[1]
-                val z = gravity[2]
+                val alpha = 0.8f
+
+                // Isolate the force of gravity with the low-pass filter.
+                gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
+                gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]
+                gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
+
+                // Remove the gravity contribution with the high-pass filter.
+                val x = event.values[0] - gravity[0]
+                val y  = event.values[1] - gravity[1]
+                val z = event.values[2] - gravity[2]
+
+                eventsCapturedCounter++
+                if (eventsCapturedCounter < 6) return
 
                 motionDetectionUseCase.captureMotion(x, y, z)
             }
