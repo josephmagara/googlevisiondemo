@@ -37,40 +37,10 @@ class MotionDetectionUseCase {
         setUp()
     }
 
-    private fun computeNewMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
-
-        if (newXPosition in previousXPosition.minus(0.3f)..previousXPosition.plus(0.3f) &&
-            newYPosition in previousYPosition.minus(0.3f)..previousYPosition.plus(0.3f) &&
-            newZPosition in previousZPosition.minus(0.3f)..previousZPosition.plus(0.3f)
-        ) {
-            updateMotionCaptureStore(newXPosition, newYPosition, newZPosition)
-            /*
-            val gradualMotionOccurring = isGraduallyMoving()
-            val finishedGraduallyMoving = gradualMotionOccurring && hasStoppedGraduallyMoving()
-
-            when {
-                finishedGraduallyMoving -> {
-                    significantPauseOccurredPublisher.onNext(true)
-                }
-                gradualMotionOccurring -> {
-                    significantPauseOccurredPublisher.onNext(false)
-                }
-                else -> {
-                    significantPauseOccurredPublisher.onNext(true)
-                }
-
-            }
-            */
-        } else {
-        }
+    private fun captureNewMotion(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
+        updateMotionCaptureStore(newXPosition, newYPosition, newZPosition)
         setNewCoordinates(newXPosition, newYPosition, newZPosition)
     }
-
-    private fun isGraduallyMoving(): Boolean =
-        MotionUtil.containsGradualMotionEvent(motionCaptureStore.motionPointList)
-
-    private fun hasStoppedGraduallyMoving(): Boolean =
-        MotionUtil.containsStopAfterGradualMotionEvent(motionCaptureStore.motionPointList)
 
     private fun updateMotionCaptureStore(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
         val storeUpdated = motionCaptureStore.addMotionPointToStore(
@@ -81,6 +51,12 @@ class MotionDetectionUseCase {
             )
         )
         if (storeUpdated) motionEventCountPublisher.onNext(1)
+    }
+
+    private fun setNewCoordinates(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
+        previousXPosition = newXPosition
+        previousYPosition = newYPosition
+        previousZPosition = newZPosition
     }
 
     private fun triggerMotionSnapshotCapture() {
@@ -116,15 +92,8 @@ class MotionDetectionUseCase {
             }
     }
 
-    private fun setNewCoordinates(newXPosition: Float, newYPosition: Float, newZPosition: Float) {
-        previousXPosition = newXPosition
-        previousYPosition = newYPosition
-        previousZPosition = newZPosition
-    }
-
     private fun hasNotBeenInitialized(): Boolean =
         arrayOf(previousXPosition, previousYPosition, previousZPosition).all { it == 0f }
-
 
 
     fun setUp() {
@@ -137,11 +106,11 @@ class MotionDetectionUseCase {
                     motionCaptureStore.endTime
                 )
 
-                if (velocity > 200f){
+                if (velocity > 200f) {
                     Timber.d("We're moving")
                     significantPauseOccurredPublisher.onNext(false)
-                }else{
-                    Timber.d("We're moving")
+                } else {
+                    Timber.d("We're still")
                     significantPauseOccurredPublisher.onNext(true)
                 }
 
@@ -149,7 +118,10 @@ class MotionDetectionUseCase {
                 motionCaptureStore.unlockStore()
             }
 
-        isComputingMotionObserver = motionCaptureStore.storeLockObserver().subscribe { isComputingMotion = it }
+        isComputingMotionObserver = motionCaptureStore.storeLockObserver().subscribe {
+            Timber.d("Store is locked: $it")
+            isComputingMotion = it
+        }
     }
 
     fun significantPauseOccurred(): Observable<Boolean> = significantPauseOccurredPublisher.toObservable()
@@ -167,11 +139,11 @@ class MotionDetectionUseCase {
             startMotionSnapshotCaptureTimer()
             setUpMotionEventCountObserver()
         } else {
-            computeNewMotion(newXPosition, newYPosition, newZPosition)
+            captureNewMotion(newXPosition, newYPosition, newZPosition)
         }
     }
 
-    fun onCleared(){
+    fun onCleared() {
         motionEventCountObserver.dispose()
         isComputingMotionObserver.dispose()
         motionSnapshotTriggerObserver.dispose()
