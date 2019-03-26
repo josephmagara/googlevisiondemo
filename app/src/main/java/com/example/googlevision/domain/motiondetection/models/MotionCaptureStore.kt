@@ -4,12 +4,18 @@ class MotionCaptureStore {
 
     internal var motionPointList: MutableList<MotionPoint> = mutableListOf()
 
-    internal var startTime = 0f
-    internal var endTime = 0f
+    private var startTime = 0f
+    private var endTime = 0f
 
-    fun addMotionPointToStore(newMotionPoint: MotionPoint) {
-        if(motionPointList.isEmpty()) startStoreInUseTimer()
+    private var storeIsLocked = false
+
+    fun addMotionPointToStore(newMotionPoint: MotionPoint) : Boolean{
+        if (storeIsLocked) return false
+
+        if (motionPointList.isEmpty()) startStoreInUseTimer()
         motionPointList.add(newMotionPoint)
+
+        return true
     }
 
     private fun startStoreInUseTimer() {
@@ -17,8 +23,18 @@ class MotionCaptureStore {
     }
 
     fun invalidateStore() {
-        if (motionPointList.any()) motionPointList.clear() else return
-        endTime = System.currentTimeMillis().toFloat()
+        if (motionPointList.any()) {
+            motionPointList.clear()
+            endTime = System.currentTimeMillis().toFloat()
+        }
+    }
+
+    fun lockStore() {
+        storeIsLocked = true
+    }
+
+    fun unlockStore() {
+        storeIsLocked = false
     }
 
 }
