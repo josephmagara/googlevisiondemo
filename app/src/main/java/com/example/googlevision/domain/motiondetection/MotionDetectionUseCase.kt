@@ -60,6 +60,7 @@ class MotionDetectionUseCase {
     }
 
     private fun triggerMotionSnapshotCapture() {
+        motionCaptureStore.lockStore()
         //Clear the disposables that call this method
         motionEventCountObserver.dispose()
         motionSnapshotCaptureTimerObservable.dispose()
@@ -79,7 +80,6 @@ class MotionDetectionUseCase {
             .subscribe {
 
                 // Lock the store so that no more motion events are added to it.
-                motionCaptureStore.lockStore()
                 triggerMotionSnapshotCapture()
             }
     }
@@ -97,7 +97,8 @@ class MotionDetectionUseCase {
 
 
     fun setUp() {
-        motionSnapshotTriggerObserver = motionSnapshotCaptureTrigger.observeOn(Schedulers.computation())
+        motionSnapshotTriggerObserver = motionSnapshotCaptureTrigger
+            .observeOn(Schedulers.computation())
             .subscribeOn(Schedulers.computation())
             .subscribe {
                 val velocity = MotionUtil.computeVelocity(
@@ -106,7 +107,7 @@ class MotionDetectionUseCase {
                     motionCaptureStore.endTime
                 )
 
-                if (velocity > 200f) {
+                if (velocity > 20f) {
                     Timber.d("We're moving")
                     significantPauseOccurredPublisher.onNext(false)
                 } else {

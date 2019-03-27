@@ -24,7 +24,7 @@ class MotionDetector @Inject constructor(
 
     private var delayTimerDisposable = Disposables.disposed()
     private var significantMotionObserver = Disposables.disposed()
-    private val gravity = arrayOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+    private val gravity = mutableListOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
     private var eventsCapturedCounter = 0
 
     var deviceIsStill: Boolean = false
