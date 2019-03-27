@@ -4,13 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context.CAMERA_SERVICE
 import android.graphics.ImageFormat
-import android.hardware.camera2.CameraAccessException
-import android.hardware.camera2.CameraCaptureSession
-import android.hardware.camera2.CameraDevice
-import android.hardware.camera2.CameraManager
-import android.hardware.camera2.CaptureRequest
-import android.hardware.camera2.CaptureResult
-import android.hardware.camera2.TotalCaptureResult
+import android.hardware.camera2.*
 import android.media.ImageReader
 import android.opengl.GLSurfaceView
 import android.os.Handler
@@ -121,16 +115,7 @@ class GoogleVisionCameraPreview(
         }
 
         val cameraAvailableCallback = object : CameraManager.AvailabilityCallback() {
-            override fun onCameraAvailable(cameraId: String) {
-                super.onCameraAvailable(cameraId)
-                //Toast.makeText(activity, "onCameraAvailable", Toast.LENGTH_SHORT).show()
-            }
 
-            override fun onCameraUnavailable(cameraId: String) {
-                super.onCameraUnavailable(cameraId)
-
-                //Toast.makeText(activity, "onCameraUnavailable", Toast.LENGTH_SHORT).show()
-            }
         }
 
         try {
@@ -155,7 +140,7 @@ class GoogleVisionCameraPreview(
                 //Toast.makeText(activity, "Photo taken", Toast.LENGTH_SHORT).show()
                 imageRetrievalPipeline.onImageReceived(image, currentCameraId)
 
-                motionDetector?.invalidateDeviceIsStillFlag()
+                motionDetector.invalidateDeviceIsStillFlag()
             } else {
                 processingForLastPhotoCompleted = true
             }
