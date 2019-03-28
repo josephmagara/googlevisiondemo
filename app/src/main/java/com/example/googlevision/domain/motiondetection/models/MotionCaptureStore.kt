@@ -2,13 +2,14 @@ package com.example.googlevision.domain.motiondetection.models
 
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
+import timber.log.Timber
 
 class MotionCaptureStore {
 
     internal var motionPointList: MutableList<MotionPoint> = mutableListOf()
 
-    internal var startTime = 0f
-    internal var endTime = 0f
+    internal var startTime = 0L
+    internal var endTime = 0L
 
     private var storeIsLocked = false
     private val storeLockPublisher : PublishProcessor<Boolean> = PublishProcessor.create()
@@ -23,19 +24,21 @@ class MotionCaptureStore {
     }
 
     private fun startStoreInUseTimer() {
-        startTime = System.currentTimeMillis().toFloat()
+        Timber.tag("FirstRun").d("Starting timer")
+        startTime = System.currentTimeMillis()
     }
 
     fun invalidateStore() {
         if (motionPointList.any()) {
             motionPointList.clear()
-            endTime = System.currentTimeMillis().toFloat()
         }
     }
 
     fun lockStore() {
         storeIsLocked = true
         storeLockPublisher.onNext(storeIsLocked)
+        Timber.tag("FirstRun").d("Stopping timer")
+        endTime = System.currentTimeMillis()
     }
 
     fun unlockStore() {

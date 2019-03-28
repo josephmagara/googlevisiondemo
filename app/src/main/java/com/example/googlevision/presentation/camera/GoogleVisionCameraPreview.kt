@@ -23,8 +23,8 @@ import javax.microedition.khronos.opengles.GL10
  * Created by josephmagara on 26/2/19.
  */
 class GoogleVisionCameraPreview(
-    cameraPreviewView: SurfaceView,
     activity: Activity,
+    cameraPreviewView: SurfaceView,
     private val motionDetector: MotionDetector,
     private val imageRetrievalPipeline: ImageRetrievalPipeline
 ) :

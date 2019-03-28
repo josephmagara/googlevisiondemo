@@ -75,8 +75,8 @@ class MotionUtil {
             }
         }
 
-        fun computeVelocity(list: List<MotionPoint>, startTime: Float, endTime: Float): Float {
-            val time = startTime - endTime
+        fun computeVelocity(list: List<MotionPoint>, startTime: Long, endTime: Long): Float {
+            val time = endTime - startTime
             var xDistance = 0f
             var yDistance = 0f
             var zDistance = 0f
@@ -87,7 +87,7 @@ class MotionUtil {
             }
 
             val distance = maxOf(xDistance, yDistance, zDistance)
-            return distance / time
+            return distance / time.div(1000.000).toFloat()
         }
 
         private fun lastTenMovesContainStopEvent(list: List<Float>): Boolean {

@@ -61,9 +61,6 @@ class MotionDetectionUseCase {
 
     private fun triggerMotionSnapshotCapture() {
         motionCaptureStore.lockStore()
-        //Clear the disposables that call this method
-        motionEventCountObserver.dispose()
-        motionSnapshotCaptureTimerObservable.dispose()
 
         //Reset the previous coordinates
         previousXPosition = 0f
@@ -75,7 +72,7 @@ class MotionDetectionUseCase {
     }
 
 
-    private fun startMotionSnapshotCaptureTimer() {
+    private fun setUpMotionSnapshotCaptureTimer() {
         motionSnapshotCaptureTimerObservable = Completable.timer(2000L, TimeUnit.MILLISECONDS)
             .subscribe {
 
@@ -86,7 +83,7 @@ class MotionDetectionUseCase {
 
     private fun setUpMotionEventCountObserver() {
         motionEventCountObserver = motionEventCountPublisher
-            .skip(50)
+            .buffer(30)
             .subscribe {
                 triggerMotionSnapshotCapture()
             }
@@ -107,11 +104,11 @@ class MotionDetectionUseCase {
                     motionCaptureStore.endTime
                 )
 
-                if (velocity > 20f) {
-                    Timber.d("We're moving")
+                if (velocity > 10f) {
+                    Timber.d("We're moving: Velocity: $velocity")
                     significantPauseOccurredPublisher.onNext(false)
                 } else {
-                    Timber.d("We're still")
+                    Timber.d("We're still: Velocity: $velocity")
                     significantPauseOccurredPublisher.onNext(true)
                 }
 
@@ -120,7 +117,7 @@ class MotionDetectionUseCase {
             }
 
         isComputingMotionObserver = motionCaptureStore.storeLockObserver().subscribe {
-            Timber.d("Store is locked: $it")
+            // Timber.d("Store is locked: $it")
             isComputingMotion = it
         }
     }
@@ -131,14 +128,17 @@ class MotionDetectionUseCase {
 
         if (isComputingMotion) return
 
+
+        //Start the timer and counter that will trigger the snapshot of the motion store (which ever fires first
+        // will trigger the snapshot capture and then reset both itself and the other timer/counter)
+        //if (motionSnapshotCaptureTimerObservable.isDisposed) setUpMotionSnapshotCaptureTimer()
+        if (motionEventCountObserver.isDisposed) setUpMotionEventCountObserver()
+
+
         if (hasNotBeenInitialized()) {
             setNewCoordinates(newXPosition, newYPosition, newZPosition)
             significantPauseOccurredPublisher.onNext(false)
 
-            //Start the timer and counter that will trigger the snapshot of the motion store (which ever fires first
-            // will trigger the snapshot capture and then reset both itself and the other timer/counter)
-            startMotionSnapshotCaptureTimer()
-            setUpMotionEventCountObserver()
         } else {
             captureNewMotion(newXPosition, newYPosition, newZPosition)
         }

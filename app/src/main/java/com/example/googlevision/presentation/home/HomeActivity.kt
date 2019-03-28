@@ -141,7 +141,7 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     // region Private functions
     private fun setupCamera() {
-        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this, motionDetector, this)
+        googleVisionCameraPreview = GoogleVisionCameraPreview(this, camera_preview, motionDetector, this)
     }
 /*
 
