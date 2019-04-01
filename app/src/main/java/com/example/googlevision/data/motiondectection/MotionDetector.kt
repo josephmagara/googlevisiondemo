@@ -54,6 +54,7 @@ class MotionDetector @Inject constructor(
                 // Shake detection
                 val alpha = 0.8f
 
+                Timber.d("x: ${event.values[0]} | y: ${event.values[1]} | z: ${event.values[2]}")
                 // Isolate the force of gravity with the low-pass filter.
                 gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
                 gravity[1] = alpha * gravity[1] + (1 - alpha) * event.values[1]

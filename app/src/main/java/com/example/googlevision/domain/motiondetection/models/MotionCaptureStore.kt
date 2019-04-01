@@ -2,7 +2,6 @@ package com.example.googlevision.domain.motiondetection.models
 
 import io.reactivex.Observable
 import io.reactivex.processors.PublishProcessor
-import timber.log.Timber
 
 class MotionCaptureStore {
 
@@ -24,7 +23,6 @@ class MotionCaptureStore {
     }
 
     private fun startStoreInUseTimer() {
-        Timber.tag("FirstRun").d("Starting timer")
         startTime = System.currentTimeMillis()
     }
 
@@ -37,7 +35,6 @@ class MotionCaptureStore {
     fun lockStore() {
         storeIsLocked = true
         storeLockPublisher.onNext(storeIsLocked)
-        Timber.tag("FirstRun").d("Stopping timer")
         endTime = System.currentTimeMillis()
     }
 

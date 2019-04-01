@@ -98,13 +98,14 @@ class MotionDetectionUseCase {
             .observeOn(Schedulers.computation())
             .subscribeOn(Schedulers.computation())
             .subscribe {
+                val storeCopy = mutableListOf<MotionPoint>().apply {
+                    addAll(motionCaptureStore.motionPointList)
+                }
                 val velocity = MotionUtil.computeVelocity(
-                    motionCaptureStore.motionPointList.toList(),
-                    motionCaptureStore.startTime,
-                    motionCaptureStore.endTime
+                    storeCopy, motionCaptureStore.startTime, motionCaptureStore.endTime
                 )
 
-                if (velocity > 10f) {
+                if (velocity > 0.7f) {
                     Timber.d("We're moving: Velocity: $velocity")
                     significantPauseOccurredPublisher.onNext(false)
                 } else {
@@ -112,6 +113,7 @@ class MotionDetectionUseCase {
                     significantPauseOccurredPublisher.onNext(true)
                 }
 
+                motionCaptureStore.invalidateStore()
                 //Unlock the store so that we can capture the motion data
                 motionCaptureStore.unlockStore()
             }
