@@ -98,6 +98,10 @@ class MotionDetectionUseCase {
             .observeOn(Schedulers.computation())
             .subscribeOn(Schedulers.computation())
             .subscribe {
+
+                // We create a copy of the store so that when we invalidate it later, we won't get into a situation
+                // were the variable that is being iterated over (when computing velocity) gets cleared thus resulting in
+                // a null-pointer exception
                 val storeCopy = mutableListOf<MotionPoint>().apply {
                     addAll(motionCaptureStore.motionPointList)
                 }
