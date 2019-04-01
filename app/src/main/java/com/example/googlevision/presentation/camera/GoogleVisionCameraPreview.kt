@@ -12,9 +12,8 @@ import android.os.Message
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import android.widget.Toast
+import com.example.googlevision.data.motiondectection.MotionDetector
 import com.example.googlevision.presentation.ImageRetrievalPipeline
-import com.example.googlevision.presentation.motiondectection.MotionDetector
 import timber.log.Timber
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -24,9 +23,9 @@ import javax.microedition.khronos.opengles.GL10
  * Created by josephmagara on 26/2/19.
  */
 class GoogleVisionCameraPreview(
+    activity: Activity,
     cameraPreviewView: SurfaceView,
-    private val activity: Activity,
-    private val motionDetector: MotionDetector?,
+    private val motionDetector: MotionDetector,
     private val imageRetrievalPipeline: ImageRetrievalPipeline
 ) :
     SurfaceHolder.Callback, GLSurfaceView.Renderer, Handler.Callback {
@@ -49,7 +48,7 @@ class GoogleVisionCameraPreview(
 
     private val canTakePhoto: Boolean
         get() {
-            return motionDetector?.deviceIsStill == true && processingForLastPhotoCompleted
+            return motionDetector.deviceIsStill && processingForLastPhotoCompleted
         }
 
     init {
@@ -116,16 +115,7 @@ class GoogleVisionCameraPreview(
         }
 
         val cameraAvailableCallback = object : CameraManager.AvailabilityCallback() {
-            override fun onCameraAvailable(cameraId: String) {
-                super.onCameraAvailable(cameraId)
-                //Toast.makeText(activity, "onCameraAvailable", Toast.LENGTH_SHORT).show()
-            }
 
-            override fun onCameraUnavailable(cameraId: String) {
-                super.onCameraUnavailable(cameraId)
-
-                //Toast.makeText(activity, "onCameraUnavailable", Toast.LENGTH_SHORT).show()
-            }
         }
 
         try {
@@ -150,7 +140,7 @@ class GoogleVisionCameraPreview(
                 //Toast.makeText(activity, "Photo taken", Toast.LENGTH_SHORT).show()
                 imageRetrievalPipeline.onImageReceived(image, currentCameraId)
 
-                motionDetector?.invalidateDeviceIsStillFlag()
+                motionDetector.invalidateDeviceIsStillFlag()
             } else {
                 processingForLastPhotoCompleted = true
             }

@@ -1,8 +1,8 @@
-package com.example.googlevision.domain.usecases
+package com.example.googlevision.domain.barcodeprocessing
 
 import com.example.googlevision.data.barcodeprocessor.interfaces.BarcodeProcessObserver
-import com.example.googlevision.domain.models.GvBarcode
-import com.example.googlevision.domain.models.GvBarcodeInformation
+import com.example.googlevision.domain.barcodeprocessing.models.GvBarcode
+import com.example.googlevision.domain.barcodeprocessing.models.GvBarcodeInformation
 import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcode
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposables

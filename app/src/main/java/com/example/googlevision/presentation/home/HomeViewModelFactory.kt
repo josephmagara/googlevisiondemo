@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.googlevision.data.barcodeprocessor.interfaces.BarcodeProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
-import com.example.googlevision.domain.usecases.ProcessBarcodeUseCase
+import com.example.googlevision.domain.barcodeprocessing.ProcessBarcodeUseCase
 import javax.inject.Inject
 
 /**

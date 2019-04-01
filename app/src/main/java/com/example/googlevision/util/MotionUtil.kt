@@ -1,7 +1,8 @@
 package com.example.googlevision.util
 
-import com.example.googlevision.presentation.motiondectection.MotionPoint
+import com.example.googlevision.domain.motiondetection.models.MotionPoint
 import com.example.googlevision.util.extensions.isGreaterThanSignedComparison
+import kotlin.math.absoluteValue
 
 
 class MotionUtil {
@@ -14,17 +15,17 @@ class MotionUtil {
         private val zMotionList: MutableList<Boolean> = mutableListOf()
 
         fun containsGradualMotionEvent(motionPointList: List<MotionPoint>): Boolean =
-                if (motionPointList.size < 10) {
-                    false
-                } else {
-                    val results = checkForGradualMotion(motionPointList)
-                    val containsGradualMotion = results.any { it }
+            if (motionPointList.size < 10) {
+                false
+            } else {
+                val results = checkForGradualMotion(motionPointList)
+                val containsGradualMotion = results.any { it }
 
-                    if (!containsGradualMotion) {
-                        clearLists()
-                    }
-                    containsGradualMotion
+                if (!containsGradualMotion) {
+                    clearLists()
                 }
+                containsGradualMotion
+            }
 
 
         fun containsStopAfterGradualMotionEvent(motionPointList: List<MotionPoint>): Boolean {
@@ -74,6 +75,21 @@ class MotionUtil {
             }
         }
 
+        fun computeVelocity(list: List<MotionPoint>, startTime: Long, endTime: Long): Float {
+            val time = endTime - startTime
+            var xDistance = 0f
+            var yDistance = 0f
+            var zDistance = 0f
+            list.forEach {
+                xDistance = +it.xPosition.absoluteValue
+                yDistance = +it.yPosition.absoluteValue
+                zDistance = +it.zPosition.absoluteValue
+            }
+
+            val distance = maxOf(xDistance, yDistance, zDistance)
+            return distance / time.div(1000.000).toFloat()
+        }
+
         private fun lastTenMovesContainStopEvent(list: List<Float>): Boolean {
             val lastMovement = list.last()
 
@@ -98,9 +114,11 @@ class MotionUtil {
             return compareMovementsAcrossAxises(xMotionList, yMotionList, zMotionList)
         }
 
-        private fun compareMovementsAcrossAxises(xList: List<Boolean>,
-                                                 yList: List<Boolean>,
-                                                 zList: List<Boolean>): List<Boolean> {
+        private fun compareMovementsAcrossAxises(
+            xList: List<Boolean>,
+            yList: List<Boolean>,
+            zList: List<Boolean>
+        ): List<Boolean> {
 
             val graduallyMovingAlongX = xList.count { it } > xList.count { !it }
             val graduallyMovingAlongY = yList.count { it } > yList.count { !it }

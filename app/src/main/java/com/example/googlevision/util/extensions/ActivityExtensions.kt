@@ -14,7 +14,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.googlevision.util.CAMERA_PERMISSION_REQUEST_CODE
-import com.example.googlevision.util.DATE_FORMAT
 import com.example.googlevision.util.READ_STORAGE_PERMISSION_REQUEST_CODE
 import com.example.googlevision.util.WRITE_TO_STORAGE_PERMISSION_REQUEST_CODE
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
@@ -104,7 +103,7 @@ fun Activity.getRotationCompensation(cameraId: String): Int {
 }
 
 fun Activity.createFile(fileName: String): File {
-    val timeStamp: String = SimpleDateFormat(DATE_FORMAT).format(Date())
+    val timeStamp: String = SimpleDateFormat.getDateInstance().format(Date())
     val storageDir: File? = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
     return File.createTempFile(
             "JPEG_${fileName}_$timeStamp", /* prefix */

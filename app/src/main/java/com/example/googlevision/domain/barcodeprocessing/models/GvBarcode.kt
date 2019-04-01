@@ -1,4 +1,4 @@
-package com.example.googlevision.domain.models
+package com.example.googlevision.domain.barcodeprocessing.models
 
 /**
  * Created by josephmagara on 21/2/19.

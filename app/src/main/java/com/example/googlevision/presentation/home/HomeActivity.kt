@@ -5,32 +5,23 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.hardware.Camera
 import android.hardware.camera2.CameraAccessException
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
 import android.hardware.camera2.CameraMetadata.LENS_FACING_FRONT
 import android.media.Image
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
-import androidx.core.content.FileProvider
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.example.googlevision.BuildConfig
-import com.example.googlevision.R
+import com.example.googlevision.data.motiondectection.MotionDetector
 import com.example.googlevision.presentation.ImageRetrievalPipeline
 import com.example.googlevision.presentation.camera.GoogleVisionCameraPreview
-import com.example.googlevision.presentation.motiondectection.MotionDetector
 import com.example.googlevision.util.TAKE_PICTURE_REQUEST_CODE
 import com.example.googlevision.util.extensions.*
 import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_home.*
 import timber.log.Timber
-import java.io.File
-import java.io.IOException
 import javax.inject.Inject
 
 
@@ -42,30 +33,31 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     private var filepath: String? = null
     private var googleVisionCameraPreview: GoogleVisionCameraPreview? = null
-    private var motionDetector: MotionDetector? = null
+
+    @Inject
+    lateinit var motionDetector: MotionDetector
 
     // region LifeCycle
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(com.example.googlevision.R.layout.activity_home)
 
-        motionDetector = MotionDetector(this)
 
         homeViewModel = ViewModelProviders.of(this, homeViewModelFactory)
             .get(HomeViewModel::class.java)
 
-        homeViewModel.addImageAction().observe(this, Observer {
+        /*homeViewModel.addImageAction().observe(this, Observer {
             takePhoto()
-        })
+        })*/
 
         homeViewModel.captureImage().observe(this, Observer {
-            val pictureCallback = Camera.PictureCallback { data, _ ->
+            /*val pictureCallback = Camera.PictureCallback { data, _ ->
                 val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
                 getCameraId()?.let { cameraId ->
                     val rotation = getRotationCompensation(cameraId)
                     homeViewModel.extractInformationFromBarcode(bitmap, rotation)
                 }
-            }
+            }*/
         })
 
         homeViewModel.processedText().observe(this, Observer { text ->
@@ -96,14 +88,14 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
         super.onResume()
         Timber.v("Starting preview")
         googleVisionCameraPreview?.startPreview()
-        motionDetector?.registerListener()
+        motionDetector.registerListener()
     }
 
     override fun onPause() {
         super.onPause()
         Timber.v("Stopping preview")
         googleVisionCameraPreview?.stopPreview()
-        motionDetector?.unRegisterListener()
+        motionDetector.unRegisterListener()
     }
     // endregion
 
@@ -149,8 +141,9 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
 
     // region Private functions
     private fun setupCamera() {
-        googleVisionCameraPreview = GoogleVisionCameraPreview(camera_preview, this, motionDetector, this)
+        googleVisionCameraPreview = GoogleVisionCameraPreview(this, camera_preview, motionDetector, this)
     }
+/*
 
     private fun takePhoto() {
         Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
@@ -178,6 +171,7 @@ class HomeActivity : DaggerAppCompatActivity(), ImageRetrievalPipeline {
             }
         }
     }
+*/
 
     private fun getCameraId(): String? {
         var cameraId: String? = null

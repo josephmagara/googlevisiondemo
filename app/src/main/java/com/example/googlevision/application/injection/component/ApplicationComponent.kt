@@ -5,6 +5,7 @@ import com.example.googlevision.application.GoogleVisionApplication
 import com.example.googlevision.application.injection.module.ActivityModule
 import com.example.googlevision.application.injection.module.ApplicationModule
 import com.example.googlevision.application.injection.module.ComponentModule
+import com.example.googlevision.application.injection.module.MotionModule
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjector
@@ -16,7 +17,7 @@ import javax.inject.Singleton
  */
 @Singleton
 @Component(modules = [AndroidSupportInjectionModule::class, ApplicationModule::class, ActivityModule::class,
-    ComponentModule::class])
+    ComponentModule::class, MotionModule::class])
 interface ApplicationComponent : AndroidInjector<GoogleVisionApplication> {
 
     @Component.Builder

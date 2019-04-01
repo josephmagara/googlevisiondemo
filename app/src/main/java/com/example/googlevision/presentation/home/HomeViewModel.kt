@@ -8,8 +8,8 @@ import androidx.lifecycle.ViewModel
 import com.example.googlevision.data.barcodeprocessor.interfaces.BarcodeProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessActioner
 import com.example.googlevision.data.imageprocessor.interfaces.ImageProcessorObserver
-import com.example.googlevision.domain.models.GvBarcode
-import com.example.googlevision.domain.usecases.ProcessBarcodeUseCase
+import com.example.googlevision.domain.barcodeprocessing.models.GvBarcode
+import com.example.googlevision.domain.barcodeprocessing.ProcessBarcodeUseCase
 import com.example.googlevision.presentation.home.models.ImageProcessingTask
 import com.example.googlevision.util.extensions.cast
 import io.reactivex.android.schedulers.AndroidSchedulers
