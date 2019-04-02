@@ -18,9 +18,8 @@ import javax.inject.Inject
  */
 class MotionDetector @Inject constructor(
         private val sensorManager: SensorManager,
-        private val accelerometer: Sensor) : SensorEventListener {
-
-    private val motionDetectionUseCase = MotionDetectionUseCase()
+        private val accelerometer: Sensor,
+        private val motionDetectionUseCase: MotionDetectionUseCase) : SensorEventListener {
 
     private var delayTimerDisposable = Disposables.disposed()
     private var significantMotionObserver = Disposables.disposed()

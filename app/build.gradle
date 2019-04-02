@@ -66,6 +66,27 @@ dependencies {
     // Timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
 
+    // Junit
+    testImplementation 'androidx.test:core:1.1.0'
+    testImplementation 'androidx.test.ext:junit:1.1.0'
+    testImplementation "org.junit.platform:junit-platform-runner:1.2.0"
+
+    // Spek
+    testImplementation "org.jetbrains.spek:spek-api:1.1.5"
+    testImplementation "org.jetbrains.spek:spek-junit-platform-engine:1.1.5"
+    testImplementation "org.jetbrains.spek:spek-subject-extension:1.1.5"
+
+    // Mockito
+    testImplementation "org.mockito:mockito-core:2.22.0"
+    testImplementation "org.mockito:mockito-inline:2.22.0"
+
+    // Test Kotlin
+    testImplementation "com.nhaarman:mockito-kotlin:1.6.0"
+    testImplementation "org.jetbrains.kotlin:kotlin-test:1.3.21"
+
+    // Spek requires kotlin-reflect, omit when already in classpath
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:1.3.21"
+
 }
 
 apply plugin: 'com.google.gms.google-services'

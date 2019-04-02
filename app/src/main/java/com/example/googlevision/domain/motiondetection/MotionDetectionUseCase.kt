@@ -2,27 +2,23 @@ package com.example.googlevision.domain.motiondetection
 
 import com.example.googlevision.domain.motiondetection.models.MotionCaptureStore
 import com.example.googlevision.domain.motiondetection.models.MotionPoint
-import com.example.googlevision.util.MotionUtil
-import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.disposables.Disposable
 import io.reactivex.disposables.Disposables
 import io.reactivex.processors.PublishProcessor
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 /**
  * Created by josephmagara on 25/3/19.
  */
-class MotionDetectionUseCase {
+class MotionDetectionUseCase @Inject constructor(private val motionCaptureStore: MotionCaptureStore) {
 
     private var previousXPosition: Float = 0f
     private var previousYPosition: Float = 0f
     private var previousZPosition: Float = 0f
     private var isComputingMotion: Boolean = false
-
-    private val motionCaptureStore = MotionCaptureStore()
 
     private val motionEventCountPublisher: PublishProcessor<Int> = PublishProcessor.create()
     private val motionSnapshotCaptureTrigger: PublishProcessor<Any> = PublishProcessor.create()
@@ -72,15 +68,6 @@ class MotionDetectionUseCase {
     }
 
 
-    private fun setUpMotionSnapshotCaptureTimer() {
-        motionSnapshotCaptureTimerObservable = Completable.timer(2000L, TimeUnit.MILLISECONDS)
-            .subscribe {
-
-                // Lock the store so that no more motion events are added to it.
-                triggerMotionSnapshotCapture()
-            }
-    }
-
     private fun setUpMotionEventCountObserver() {
         motionEventCountObserver = motionEventCountPublisher
             .buffer(30)
@@ -102,12 +89,7 @@ class MotionDetectionUseCase {
                 // We create a copy of the store so that when we invalidate it later, we won't get into a situation
                 // were the variable that is being iterated over (when computing velocity) gets cleared thus resulting in
                 // a null-pointer exception
-                val storeCopy = mutableListOf<MotionPoint>().apply {
-                    addAll(motionCaptureStore.motionPointList)
-                }
-                val velocity = MotionUtil.computeVelocity(
-                    storeCopy, motionCaptureStore.startTime, motionCaptureStore.endTime
-                )
+                val velocity = motionCaptureStore.getVelocity()
 
                 if (velocity > 0.7f) {
                     Timber.d("We're moving: Velocity: $velocity")
