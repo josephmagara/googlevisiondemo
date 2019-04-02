@@ -70,7 +70,7 @@ class MotionDetectionUseCase @Inject constructor(private val motionCaptureStore:
 
     private fun setUpMotionEventCountObserver() {
         motionEventCountObserver = motionEventCountPublisher
-            .buffer(30)
+            .buffer(10)
             .subscribe {
                 triggerMotionSnapshotCapture()
             }
@@ -84,7 +84,7 @@ class MotionDetectionUseCase @Inject constructor(private val motionCaptureStore:
         motionSnapshotTriggerObserver = motionSnapshotCaptureTrigger
             .observeOn(Schedulers.computation())
             .subscribeOn(Schedulers.computation())
-            .subscribe {
+            .subscribe ({
 
                 // We create a copy of the store so that when we invalidate it later, we won't get into a situation
                 // were the variable that is being iterated over (when computing velocity) gets cleared thus resulting in
@@ -102,7 +102,9 @@ class MotionDetectionUseCase @Inject constructor(private val motionCaptureStore:
                 motionCaptureStore.invalidateStore()
                 //Unlock the store so that we can capture the motion data
                 motionCaptureStore.unlockStore()
-            }
+            }, {
+                Timber.e(it)
+            })
 
         isComputingMotionObserver = motionCaptureStore.storeLockObserver().subscribe {
             // Timber.d("Store is locked: $it")

@@ -28,8 +28,10 @@ class MotionCaptureStore {
     }
 
     fun invalidateStore() {
-        if (motionPointList.any()) {
-            motionPointList.clear()
+        synchronized(this) {
+            if (motionPointList.any()) {
+                motionPointList.clear()
+            }
         }
     }
 
@@ -47,12 +49,14 @@ class MotionCaptureStore {
     fun storeLockObserver(): Observable<Boolean> = storeLockPublisher.toObservable()
 
     fun getVelocity(): Float {
+        synchronized(this) {
 
-        val storeCopy = mutableListOf<MotionPoint>().apply {
-            addAll(motionPointList)
+            val storeCopy = mutableListOf<MotionPoint>().apply {
+                addAll(motionPointList)
+            }
+            return MotionUtil.computeVelocity(
+                    storeCopy, startTime, endTime
+            )
         }
-        return MotionUtil.computeVelocity(
-                storeCopy, startTime, endTime
-        )
     }
 }

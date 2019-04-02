@@ -3,7 +3,6 @@ package com.example.googlevision.application.injection.module
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorManager
-import com.example.googlevision.data.clock.GoogleVisionClock
 import com.example.googlevision.data.motiondectection.MotionDetector
 import com.example.googlevision.domain.motiondetection.MotionDetectionUseCase
 import com.example.googlevision.domain.motiondetection.models.MotionCaptureStore
@@ -31,10 +30,7 @@ class MotionModule {
                                motionDetectionUseCase: MotionDetectionUseCase): MotionDetector =
             MotionDetector(sensorManager, accelerometer, motionDetectionUseCase)
 
-    @Provides
-    fun providesGoogleVisionModule(): GoogleVisionClock = GoogleVisionClock()
 
     @Provides
-    fun providesMotionCaptureStore(clock: GoogleVisionClock): MotionCaptureStore =
-            MotionCaptureStore(clock)
+    fun providesMotionCaptureStore(): MotionCaptureStore = MotionCaptureStore()
 }

@@ -19,7 +19,7 @@ class MotionUtil {
                 zDistance = +it.zPosition.absoluteValue
             }
 
-            val distance = maxOf(xDistance, yDistance, zDistance)
+            val distance = xDistance + yDistance + zDistance
             return distance / time.div(1000.000).toFloat()
         }
     }
