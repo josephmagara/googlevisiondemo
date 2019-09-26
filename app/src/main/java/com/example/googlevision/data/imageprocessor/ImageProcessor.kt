@@ -53,6 +53,7 @@ class ImageProcessor @Inject constructor() : FireBaseProcessor(), ImageProcessAc
         labeler.processImage(firebaseVisionImage)
             .addOnSuccessListener { labels ->
                 Timber.d(firebaseVisionImage.toString().withDefaultValueIfNeeded())
+                labels.sortBy { it.confidence }
                 resultProcessor.onNext(labels)
                 image.close()
             }
