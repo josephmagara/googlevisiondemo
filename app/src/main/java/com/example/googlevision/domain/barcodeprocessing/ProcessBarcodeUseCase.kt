@@ -25,9 +25,8 @@ class ProcessBarcodeUseCase @Inject constructor(barcodeProcessObserver: BarcodeP
                 for (barcode in barcodes) {
                     val rawValue = barcode.rawValue
 
-                    val valueType = barcode.valueType
                     // See API reference for complete list of supported types
-                    when (valueType) {
+                    when (barcode.valueType) {
                         FirebaseVisionBarcode.TYPE_WIFI -> {
                             val ssid = barcode.wifi!!.ssid
                             val password = barcode.wifi!!.password
